@@ -1,32 +1,20 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
+.DS_Store
+xcuserdata
+Debug
+Release
+Release_x86
+*.suo
+*.dcu
+*.~*
+*.depend
+*.layout
+*.filters
+*.xccheckout
+*.xcscmblueprint
+*.xcscheme
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
-*.lib
-
-# Executables
 *.exe
-*.out
-*.app
+*.opensdf
+*.sdf
+*.ipch

@@ -1,0 +1,6 @@
+[submodule "tinyuz"]
+	path = tinyuz
+	url = git@github.com:sisong/tinyuz.git
+[submodule "HDiffPatch"]
+	path = HDiffPatch
+	url = git@github.com:sisong/HDiffPatch.git
