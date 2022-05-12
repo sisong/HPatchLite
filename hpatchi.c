@@ -314,8 +314,10 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     patchListener.base.read_diff=_do_readFile;
     {//open diff info
         hpi_pos_t newSize;
+        hpi_pos_t uncompressSize;
         hpi_compressType compress_type;
-        if (!hpatch_lite_open(patchListener.base.diff_data,patchListener.base.read_diff,&compress_type,&newSize))
+        if (!hpatch_lite_open(patchListener.base.diff_data,patchListener.base.read_diff,
+                              &compress_type,&newSize,&uncompressSize))
             check(hpatch_FALSE,HPATCHI_PATCH_OPEN_ERROR,"hpatch_lite_open() run");
         
         printf("newDataSize : %" PRIu64 "\n",(hpatch_StreamPos_t)newSize);
