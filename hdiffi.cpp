@@ -527,20 +527,21 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
     printf("oldDataSize : %" PRIu64 "\nnewDataSize : %" PRIu64 "\n",
            (hpatch_StreamPos_t)oldMem.size(),(hpatch_StreamPos_t)newMem.size());
     if (diffSets.isDoDiff){
-        check(hpatch_TFileStreamOutput_open(&diffData_out,outDiffFileName,~(hpatch_StreamPos_t)0),
-                HDIFFI_OPENWRITE_ERROR,"open out diffFile");
-        hpatch_TFileStreamOutput_setRandomOut(&diffData_out,hpi_TRUE);
+        std::vector<hpi_byte> outDiffData;
         try {
             create_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
-                             &diffData_out.base,compressPlugin,(int)diffSets.matchScore,diffSets.isUseBigCacheMatch?true:false);
-            diffData_out.base.streamSize=diffData_out.out_length;
+                             outDiffData,compressPlugin,(int)diffSets.matchScore,diffSets.isUseBigCacheMatch?true:false);
         }catch(const std::exception& e){
-            check(!diffData_out.fileError,HDIFFI_OPENWRITE_ERROR,"write diffFile");
             check(false,HDIFFI_DIFF_ERROR,"diff run error: "+e.what());
         }
-        const hpatch_StreamPos_t outDiffDataSize=diffData_out.base.streamSize;
-        check(hpatch_TFileStreamOutput_close(&diffData_out),HDIFFI_FILECLOSE_ERROR,"out diffFile close");
-        printf("diffDataSize: %" PRIu64 "\n",outDiffDataSize);
+        {
+            check(hpatch_TFileStreamOutput_open(&diffData_out,outDiffFileName,outDiffData.size()),
+                HDIFFI_OPENWRITE_ERROR,"open out diffFile");
+            check(diffData_out.base.write(&diffData_out.base,0,outDiffData.data(),outDiffData.data()+outDiffData.size()),
+                HDIFFI_OPENWRITE_ERROR,"write diffFile");
+            check(hpatch_TFileStreamOutput_close(&diffData_out),HDIFFI_FILECLOSE_ERROR,"out diffFile close");
+        }
+        printf("diffDataSize: %" PRIu64 "\n",(hpatch_StreamPos_t)outDiffData.size());
         printf("diff    time: %.3f s\n",(clock_s()-diff_time0));
         printf("  out diff file ok!\n");
     }
@@ -564,7 +565,7 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
         {
             check(check_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
                                   diffMem.data(),diffMem.data_end(),saved_decompressPlugin),
-                  HDIFFI_PATCH_ERROR,"hpatch_lite_patch() out data");
+                  HDIFFI_PATCH_ERROR,"check_lite_diff()");
         }
         printf("patch   time: %.3f s\n",(clock_s()-patch_time0));
         printf("  patch check diff data ok!\n");
