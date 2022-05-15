@@ -1,0 +1,38 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  make-build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: makeInit
+        run: |
+          make LZMA=0 ZLIB=0 -j
+      - name: makeAll
+        run: |
+          make -j
+
+  clang-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: installClang
+        run: |
+          sudo apt-get install -y llvm clang
+      - name: makeByClang
+        run: |
+          make CL=1 -j
+
+  vc-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+      - name: buildByVC
+        run: |
+          msbuild builds/vc/HDiffPatch.sln -t:rebuild -verbosity:diag -property:Configuration=Release
