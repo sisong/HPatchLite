@@ -49,10 +49,11 @@ static void printUsage(){
            "  if oldFile is empty input parameter \"\"\n"
            "options:\n"
            "  -s[-cacheSize] \n"
-           "      DEFAULT -s-12k; cacheSize>=3, can like 256,1k, 60k or 1m etc....\n"
+           "      DEFAULT -s-48k; cacheSize>=3, can like 256,1k, 60k or 1m etc....\n"
            "      requires (cacheSize + 1*decompress buffer size)+O(1) bytes of memory.\n"
            "  -f  Force overwrite, ignore write path already exists;\n"
            "      DEFAULT (no -f) not overwrite and then return error;\n"
+           "      if used -f and write path is exist directory, will always return error.\n"
            "  -v  output Version info.\n"
            );
     printHelpInfo();
@@ -71,6 +72,7 @@ typedef enum THPatchiResult {
     HPATCHI_MEM_ERROR,
     HPATCHI_OPENDECOMPRESSER_ERROR,
     HPATCHI_COMPRESSTYPE_ERROR, //10
+    HPATCHI_PATCH_DICT_ERROR,
     HPATCHI_PATCH_OPEN_ERROR,
     HPATCHI_PATCH_ERROR,
     HPATCHI_PATHTYPE_ERROR,
@@ -104,7 +106,7 @@ int main(int argc, const char * argv[]){
         printHelpInfo(); return HPATCHI_OPTIONS_ERROR; } }
 
 #define kPatchCacheSize_min      ((hpi_kMinCacheSize+1)/2 *3)
-#define kPatchCacheSize_default  (1024*32 *3)
+#define kPatchCacheSize_default  (1024*16 *3)
 #define kPatchCacheSize_bestmax  (1024*1024*64 *3)
 
 #define _kNULL_VALUE    (-1)
@@ -333,7 +335,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
         case hpi_compressType_tuz: {
             const size_t stepSize=patchCacheSize/3;
             const tuz_size_t dictSize=tuz_TStream_read_dict_size(patchListener.base.diff_data,patchListener.base.read_diff);
-            assert(dictSize<tuz_kMaxOfDictSize);
+            check(((tuz_size_t)(dictSize-1))<tuz_kMaxOfDictSize,HPATCHI_PATCH_DICT_ERROR,"tuz_TStream_read_dict_size() dict size");
             assert(stepSize==(tuz_size_t)stepSize);
             temp_cache=(hpi_byte*)malloc(dictSize+stepSize*3);
             check(temp_cache,HPATCHI_MEM_ERROR,"alloc cache memory");

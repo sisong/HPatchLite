@@ -58,7 +58,7 @@ static void printUsage(){
            "  -m[-matchScore]\n"
            "      requires (newFileSize+ oldFileSize*5(or *9 when oldFileSize>=2GB))+O(1)\n"
            "        bytes of memory;\n"
-           "      matchScore>=0, DEFAULT -m-4\n"
+           "      matchScore>=0, DEFAULT -m-6\n"
            "special options:\n"
            "  -cache \n"
            "      set is use a big cache for slow match, DEFAULT false;\n"
@@ -75,7 +75,7 @@ static void printUsage(){
            "      support compress type & level & dict:\n"
 #ifdef _CompressPlugin_tuz
            "        -c-tuz[-dictSize]               (or -tinyuz)\n"
-           "            1<=dictSize<=" _HDIFFPATCH_EXPAND_AND_QUOTE(tuz_kMaxOfDictSize) ", can like 250,511,1k,4k,64k,1m,64m...1g, DEFAULT 32k\n"
+           "            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m,512m..., DEFAULT 32k\n"
 #endif
 #ifdef _CompressPlugin_zlib
            "        -c-zlib[-{1..9}[-dictBits]]     DEFAULT level 9\n"
@@ -435,7 +435,8 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
     else if (threadNum>_THREAD_NUMBER_MAX)
         threadNum=_THREAD_NUMBER_MAX;
     if (compressPlugin.compress!=0){
-        compressPlugin.compress->setParallelThreadNumber(compressPlugin.compress,(int)threadNum);
+        hdiff_TCompress* compress=(hdiff_TCompress*)compressPlugin.compress;
+        compress->setParallelThreadNumber(compress,(int)threadNum);
     }
     
     if (isOldFileInputEmpty==_kNULL_VALUE)

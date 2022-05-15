@@ -153,6 +153,12 @@
     <ClCompile Include="..\..\hpatchi.c" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\HDiffPatch\builds\vc\lzma.vcxproj">
+      <Project>{0849cd0e-1b9b-44eb-8937-a278b6a7e2cf}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\HDiffPatch\builds\vc\zlib.vcxproj">
+      <Project>{35ed7715-6b17-4225-8171-c954968d8f8c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\tinyuz\builds\vc\libtinyuz.vcxproj">
       <Project>{6609e1cf-8dae-41e9-bc20-1574e49ec91b}</Project>
     </ProjectReference>
