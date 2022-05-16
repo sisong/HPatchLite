@@ -15,7 +15,7 @@ HPatchLite 是 [HDiffPatch](https://github.com/sisong/HDiffPatch)的一个特殊
 (开发评估中...)
 
 ## 自己编译
-编译时需要[HDiffPatch](https://github.com/sisong/HDiffPatch)库 和 [tinyuz](https://github.com/sisong/tinyuz)库 (已经添加成本仓库的子仓库)
+编译时需要子仓库 [HDiffPatch](https://github.com/sisong/HDiffPatch)库 和 [tinyuz](https://github.com/sisong/tinyuz)库
 ```
 $ cd <dir>
 $ git clone --recursive https://github.com/sisong/HPatchLite.git

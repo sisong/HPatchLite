@@ -8,6 +8,9 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
       - name: makeInit
         run: |
           make LZMA=0 ZLIB=0 -j
@@ -22,6 +25,9 @@ jobs:
       - name: installClang
         run: |
           sudo apt-get install -y llvm clang
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
       - name: makeByClang
         run: |
           make CL=1 -j
@@ -33,6 +39,9 @@ jobs:
       - uses: microsoft/setup-msbuild@v1.1
         with:
           msbuild-architecture: x64
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
       - name: buildByVC
         run: |
           msbuild builds/vc/HDiffPatch.sln -t:rebuild -verbosity:diag -property:Configuration=Release

@@ -15,7 +15,7 @@ And the patch memory(RAM occupancy) can also be very small, RAM size = one decom
 (developmenting & evaluating ...)
 
 ## Build it yourself
-need libraries [HDiffPatch](https://github.com/sisong/HDiffPatch) and [tinyuz](https://github.com/sisong/tinyuz)
+need submodule libraries [HDiffPatch](https://github.com/sisong/HDiffPatch) and [tinyuz](https://github.com/sisong/tinyuz)
 ```
 $ cd <dir>
 $ git clone --recursive https://github.com/sisong/HPatchLite.git
