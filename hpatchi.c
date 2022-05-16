@@ -273,6 +273,11 @@ static hpi_BOOL _do_tuz_decompress(hpi_TInputStreamHandle diffStream,hpi_byte* o
 }
 #endif
 
+static hpatch_BOOL _read_empty(const struct hpatch_TStreamInput* stream,hpatch_StreamPos_t readFromPos,
+                               unsigned char* out_data,unsigned char* out_data_end){
+    return (readFromPos==0)&(out_data==out_data_end);
+}
+
 int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewFileName,size_t patchCacheSize){
     int     result=HPATCHI_SUCCESS;
     int     _isInClear=hpatch_FALSE;
@@ -297,7 +302,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
         printf("\"\nout : \""); hpatch_printPath_utf8(outNewFileName);
         printf("\"\n");
         if (0==strcmp(oldFileName,"")){ // isOldFileInputEmpty
-            mem_as_hStreamInput(&oldData.base,0,0);
+            oldData.base.read=_read_empty;
         }else{
             check(hpatch_TFileStreamInput_open(&oldData,oldFileName),
                   HPATCHI_OPENREAD_ERROR,"open oldFile for read");

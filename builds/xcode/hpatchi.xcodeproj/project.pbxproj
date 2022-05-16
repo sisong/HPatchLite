@@ -11,7 +11,6 @@
 		0DB0B01E283222BB007DC717 /* tuz_dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B01D283222BB007DC717 /* tuz_dec.c */; };
 		0DB0B0272832236F007DC717 /* file_for_patch.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B0262832236F007DC717 /* file_for_patch.c */; };
 		0DB0B02928322385007DC717 /* hpatch_lite.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B02828322385007DC717 /* hpatch_lite.c */; };
-		0DB0B02B28322398007DC717 /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B02A28322398007DC717 /* patch.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,7 +31,6 @@
 		0DB0B01D283222BB007DC717 /* tuz_dec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tuz_dec.c; path = ../../tinyuz/decompress/tuz_dec.c; sourceTree = "<group>"; };
 		0DB0B0262832236F007DC717 /* file_for_patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = file_for_patch.c; path = ../../HDiffPatch/file_for_patch.c; sourceTree = "<group>"; };
 		0DB0B02828322385007DC717 /* hpatch_lite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hpatch_lite.c; path = ../../HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.c; sourceTree = "<group>"; };
-		0DB0B02A28322398007DC717 /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../HDiffPatch/libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,7 +65,6 @@
 		0DB0B02528322354007DC717 /* hdiffpatch */ = {
 			isa = PBXGroup;
 			children = (
-				0DB0B02A28322398007DC717 /* patch.c */,
 				0DB0B02828322385007DC717 /* hpatch_lite.c */,
 				0DB0B0262832236F007DC717 /* file_for_patch.c */,
 			);
@@ -134,7 +131,6 @@
 				0DB0B0272832236F007DC717 /* file_for_patch.c in Sources */,
 				0DB0B01E283222BB007DC717 /* tuz_dec.c in Sources */,
 				0DB0B01C283222A8007DC717 /* hpatchi.c in Sources */,
-				0DB0B02B28322398007DC717 /* patch.c in Sources */,
 				0DB0B02928322385007DC717 /* hpatch_lite.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

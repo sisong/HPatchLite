@@ -63,9 +63,6 @@
 		<Unit filename="../../HDiffPatch/file_for_patch.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="../../HDiffPatch/libHDiffPatch/HPatch/patch.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="../../HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.c">
 			<Option compilerVar="CC" />
 		</Unit>
