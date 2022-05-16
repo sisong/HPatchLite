@@ -44,4 +44,4 @@ jobs:
           git submodule update --init --recursive
       - name: buildByVC
         run: |
-          msbuild builds/vc/HDiffPatch.sln -t:rebuild -verbosity:diag -property:Configuration=Release
+          msbuild builds/vc2019/HPatchLite.sln -t:rebuild -verbosity:diag -property:Configuration=Release

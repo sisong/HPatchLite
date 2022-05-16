@@ -161,7 +161,7 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
         _options_check((op!=0)&&(op[0]=='-'),"?");
         switch (op[1]) {
             case 's':{
-                _options_check((patchCacheSize==(size_t)_kNULL_VALUE)&&(op[2]=='-')||(op[2]=='\0'),"-s");
+                _options_check((patchCacheSize==(size_t)_kNULL_VALUE)&&((op[2]=='-')||(op[2]=='\0')),"-s");
                 if (op[2]=='-'){
                     const char* pnum=op+3;
                     _options_check(kmg_to_size(pnum,strlen(pnum),&patchCacheSize),"-s-?");
@@ -187,7 +187,7 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
             } break;
         }//switch
     }
-    
+
     if (isOutputHelp==_kNULL_VALUE)
         isOutputHelp=hpatch_FALSE;
     if (isOutputVersion==_kNULL_VALUE)
@@ -202,7 +202,7 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
         if (arg_values_size==0)
             return 0; //ok
     }
-    
+
     if (patchCacheSize==(size_t)_kNULL_VALUE)
         patchCacheSize=kPatchCacheSize_default;
     else if (patchCacheSize<kPatchCacheSize_min)
@@ -219,8 +219,6 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
         const char* oldFile     =0;
         const char* diffFileName=0;
         const char* outNewFile  =0;
-        hpatch_StreamPos_t diffDataOffert=0;
-        hpatch_StreamPos_t diffDataSize=0;
         {
             oldFile     =arg_values[0];
             diffFileName=arg_values[1];
@@ -233,7 +231,7 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
             _return_check(outNewFileType==kPathType_notExist,
                           HPATCHI_PATHTYPE_ERROR,"outNewFile already exists, overwrite");
         }
-        
+
         //patch out new file
         return hpatchi(oldFile,diffFileName,outNewFile,patchCacheSize);
     }
@@ -283,8 +281,6 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     hpatch_TFileStreamInput     diffData;
     hpatch_TFileStreamInput     oldData;
     hpatch_TStreamInput* poldData=&oldData.base;
-    hpatch_StreamPos_t   savedNewSize=0;
-    int                  patch_result=HPATCHI_SUCCESS;
     hpi_byte*            temp_cache=0;
     TPatchListener       patchListener;
 #ifdef _CompressPlugin_tuz
@@ -321,7 +317,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
         if (!hpatch_lite_open(patchListener.base.diff_data,patchListener.base.read_diff,
                               &compress_type,&newSize,&uncompressSize))
             check(hpatch_FALSE,HPATCHI_PATCH_OPEN_ERROR,"hpatch_lite_open() run");
-        
+
         printf("newDataSize : %" PRIu64 "\n",(hpatch_StreamPos_t)newSize);
         check(hpatch_TFileStreamOutput_open(&newData,outNewFileName,newSize),
               HPATCHI_OPENWRITE_ERROR,"open out newFile for write");
@@ -330,7 +326,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
         case hpi_compressType_no: {
             temp_cache=(hpi_byte*)malloc(patchCacheSize);
             check(temp_cache,HPATCHI_MEM_ERROR,"alloc cache memory");
-        }
+        } break;
       #ifdef _CompressPlugin_tuz
         case hpi_compressType_tuz: {
             const size_t stepSize=patchCacheSize/3;
@@ -345,7 +341,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
             patchCacheSize=stepSize*2;
             patchListener.base.diff_data=&tuzStream;
             patchListener.base.read_diff=_do_tuz_decompress;
-        }
+        } break;
       #endif // _CompressPlugin_tuz
         default: {
             LOG_ERR("unknow compress_type \"%d\" ERROR!\n",(int)compress_type);
@@ -367,7 +363,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
         check(hpatch_FALSE,HPATCHI_PATCH_ERROR,"hpatch_lite_patch() run");
     }
     printf("  patch ok!\n");
-    
+
 clear:
     _isInClear=hpatch_TRUE;
     check(hpatch_TFileStreamOutput_close(&newData),HPATCHI_FILECLOSE_ERROR,"out newFile close");

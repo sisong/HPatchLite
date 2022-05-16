@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="hpatchi" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/hpatchi" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/hpatchi" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wno-error=format-security" />
+					<Add option="-fvisibility=hidden" />
+					<Add option="-ffunction-sections -fdata-sections" />
+					<Add option="-ffat-lto-objects -flto" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-Wl,--gc-sections,--as-needed" />
+				</Linker>
+			</Target>
+			<Target title="Release_x86">
+				<Option output="bin/Release_x86/hpatchi" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release_x86/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-m32" />
+					<Add option="-Wno-error=format-security" />
+					<Add option="-fvisibility=hidden" />
+					<Add option="-ffunction-sections -fdata-sections" />
+					<Add option="-ffat-lto-objects -flto" />
+					<Add option="-DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-m32" />
+					<Add option="-Wl,--gc-sections,--as-needed" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-D_LARGEFILE_SOURCE" />
+			<Add option="-D_FILE_OFFSET_BITS=64" />
+			<Add directory="../../tinyuz/decompress" />
+		</Compiler>
+		<Unit filename="../../HDiffPatch/file_for_patch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../HDiffPatch/libHDiffPatch/HPatch/patch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../hpatchi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../tinyuz/decompress/tuz_dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

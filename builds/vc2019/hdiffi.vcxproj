@@ -19,37 +19,35 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EA37A322-B118-4347-86E3-BB084516AD12}</ProjectGuid>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <Keyword>ManagedCProj</Keyword>
-    <RootNamespace>hpatchi</RootNamespace>
+    <ProjectGuid>{FF2AA7AD-BD91-4529-B617-0C07E3530883}</ProjectGuid>
+    <RootNamespace>hdiffi</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CLRSupport>false</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CLRSupport>false</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <CLRSupport>false</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <CLRSupport>false</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -68,104 +66,92 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
-      <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
-      <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\HDiffPatch\file_for_patch.c" />
-    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatchLite\hpatch_lite.c" />
-    <ClCompile Include="..\..\hpatchi.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\HDiffPatch\builds\vc\lzma.vcxproj">
+    <ProjectReference Include="..\..\HDiffPatch\builds\vc2019\lzma.vcxproj">
       <Project>{0849cd0e-1b9b-44eb-8937-a278b6a7e2cf}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\HDiffPatch\builds\vc\zlib.vcxproj">
+    <ProjectReference Include="..\..\HDiffPatch\builds\vc2019\zlib.vcxproj">
       <Project>{35ed7715-6b17-4225-8171-c954968d8f8c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\tinyuz\builds\vc\libtinyuz.vcxproj">
+    <ProjectReference Include="..\..\tinyuz\builds\vc2019\libtinyuz.vcxproj">
       <Project>{6609e1cf-8dae-41e9-bc20-1574e49ec91b}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\HDiffPatch\file_for_patch.c" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\diff.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\bytes_rle.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\compress_detect.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\libdivsufsort\divsufsort64.c" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\limit_mem_diff\adler_roll.c" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\limit_mem_diff\digest_matcher.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\limit_mem_diff\stream_serialize.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\suffix_string.cpp" />
+    <ClCompile Include="..\..\hdiffi.cpp" />
+    <ClCompile Include="..\..\hdiffi_import_patch.c" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatchLite\hpatch_lite.c" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatch\patch.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
