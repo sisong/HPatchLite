@@ -1,0 +1,12 @@
+[submodule "tinyuz"]
+	path = tinyuz
+	url = https://github.com/sisong/tinyuz.git
+[submodule "HDiffPatch"]
+	path = HDiffPatch
+	url = https://github.com/sisong/HDiffPatch.git
+[submodule "lzma"]
+	path = lzma
+	url = https://github.com/sisong/lzma.git
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/sisong/zlib.git

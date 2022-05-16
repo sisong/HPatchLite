@@ -1,0 +1,59 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  make-build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
+      - name: makeInit
+        run: |
+          make LZMA=0 ZLIB=0 -j
+      - name: makeAll
+        run: |
+          make -j
+
+  clang-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: installClang
+        run: |
+          sudo apt-get install -y llvm clang
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
+      - name: makeByClang
+        run: |
+          make CL=1 -j
+
+  xcode-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
+      - name: buildByXcode
+        run: |
+          xcodebuild -workspace builds/xcode/HPatchLite.xcworkspace -scheme hpatchi -configuration Release OBJROOT=$PWD/bin SYMROOT=$PWD/bin
+          xcodebuild -workspace builds/xcode/HPatchLite.xcworkspace -scheme hdiffi -configuration Release OBJROOT=$PWD/bin SYMROOT=$PWD/bin
+
+  vc-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
+      - name: buildByVC
+        run: |
+          msbuild builds/vc2019/HPatchLite.sln -t:rebuild -verbosity:diag -property:Configuration=Release
