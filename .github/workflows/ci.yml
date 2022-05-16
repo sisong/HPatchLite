@@ -32,6 +32,18 @@ jobs:
         run: |
           make CL=1 -j
 
+  xcode-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: pullModules
+        run: |
+          git submodule update --init --recursive
+      - name: buildByXcode
+        run: |
+          xcodebuild -workspace builds/xcode/HPatchLite.xcworkspace -scheme hpatchi -configuration Release OBJROOT=$PWD/bin SYMROOT=$PWD/bin
+          xcodebuild -workspace builds/xcode/HPatchLite.xcworkspace -scheme hdiffi -configuration Release OBJROOT=$PWD/bin SYMROOT=$PWD/bin
+
   vc-build:
     runs-on: windows-latest
     steps:
