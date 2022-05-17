@@ -23,14 +23,19 @@
 #endif
 #if (_IS_NEED_DEFAULT_CompressPlugin)
 //===== select needs decompress plugins or change to your plugin=====
-//#   define _CompressPlugin_zlib
+#   define _CompressPlugin_tuz
+#   define _CompressPlugin_zlib
 //#   define _CompressPlugin_lzma
 //#   define _CompressPlugin_lzma2
-#   define _CompressPlugin_tuz
 #endif
 
 #ifdef _CompressPlugin_tuz
-#   include "tuz_dec.h"
+#   include "tuz_dec.h"  // "tinyuz/decompress/tuz_dec.h" https://github.com/sisong/tinyuz
+#endif
+#ifdef _CompressPlugin_zlib
+#   include "zutil.h"  // http://zlib.net/  https://github.com/madler/zlib
+#   include "inftrees.h" //for code
+#   include "inflate.h" //for inflate_state
 #endif
 
 static void printVersion(){
@@ -63,19 +68,20 @@ static void printUsage(){
 typedef enum THPatchiResult {
     HPATCHI_SUCCESS=0,
     HPATCHI_OPTIONS_ERROR,
+    HPATCHI_PATHTYPE_ERROR,
     HPATCHI_OPENREAD_ERROR,
     HPATCHI_OPENWRITE_ERROR,
-    HPATCHI_FILEREAD_ERROR,
-    HPATCHI_FILEWRITE_ERROR, // 5
+    HPATCHI_FILEREAD_ERROR,// 5
+    HPATCHI_FILEWRITE_ERROR, 
     HPATCHI_FILEDATA_ERROR,
     HPATCHI_FILECLOSE_ERROR,
     HPATCHI_MEM_ERROR,
-    HPATCHI_OPENDECOMPRESSER_ERROR,
     HPATCHI_COMPRESSTYPE_ERROR, //10
-    HPATCHI_PATCH_DICT_ERROR,
-    HPATCHI_PATCH_OPEN_ERROR,
+    HPATCHI_DECOMPRESSER_DICT_ERROR,
+    HPATCHI_DECOMPRESSER_OPEN_ERROR,
+    HPATCHI_DECOMPRESSER_CLOSE_ERROR,
+    HPATCHI_PATCH_OPEN_ERROR=20,
     HPATCHI_PATCH_ERROR,
-    HPATCHI_PATHTYPE_ERROR,
 } THPatchiResult;
 
 int hpatchi_cmd_line(int argc, const char * argv[]);
@@ -252,6 +258,10 @@ typedef struct TPatchListener{
     FILE*                   new_file;
 } TPatchListener;
 
+static hpatch_BOOL _read_empty(const struct hpatch_TStreamInput* stream,hpatch_StreamPos_t readFromPos,
+                               unsigned char* out_data,unsigned char* out_data_end){
+    return (readFromPos==0)&(out_data==out_data_end);
+}
 static hpi_BOOL _do_readFile(hpi_TInputStreamHandle diffStream,hpi_byte* out_data,hpi_size_t* data_size){
     *data_size=(hpi_size_t)fread(out_data,1,*data_size,(FILE*)diffStream);
     return hpi_TRUE;
@@ -273,10 +283,75 @@ static hpi_BOOL _do_tuz_decompress(hpi_TInputStreamHandle diffStream,hpi_byte* o
 }
 #endif
 
-static hpatch_BOOL _read_empty(const struct hpatch_TStreamInput* stream,hpatch_StreamPos_t readFromPos,
-                               unsigned char* out_data,unsigned char* out_data_end){
-    return (readFromPos==0)&(out_data==out_data_end);
+#ifdef _CompressPlugin_zlib
+    typedef struct _zlib_TStream{
+        hpi_TInputStreamHandle  code_stream;
+        hpi_TInputStream_read   read_code;
+        hpi_pos_t               uncompressSize;
+        unsigned char*  zlib_mem;
+        size_t          zlib_mem_size;
+        
+        unsigned char*  dec_buf;
+        hpi_size_t      dec_buf_size;
+        z_stream        d_stream;
+    } _zlib_TStream;
+
+static voidpf _zlib_TStream_malloc OF((voidpf opaque, uInt items, uInt size)){
+    _zlib_TStream* self=(_zlib_TStream*)opaque;
+    size_t alloc_size=items*(size_t)size;
+    voidpf result=self->zlib_mem;
+    if (alloc_size>self->zlib_mem_size)
+        return 0;
+    self->zlib_mem+=alloc_size;
+    self->zlib_mem_size-=alloc_size;
+    return result;
 }
+static void _zlib_TStream_free OF((voidpf opaque, voidpf address)) { }
+
+    static hpatch_BOOL __zlib_TStream_inflate(_zlib_TStream* self){
+        int ret;
+        uInt avail_out_back;
+        hpi_size_t avail_in_back=self->d_stream.avail_in;
+        if (avail_in_back==0) {
+            avail_in_back=self->dec_buf_size;
+            if (!self->read_code(self->code_stream,self->dec_buf,&avail_in_back))
+                return hpatch_FALSE;//error;
+            assert(avail_in_back==(uInt)avail_in_back);
+            self->d_stream.avail_in=(uInt)avail_in_back;
+            self->d_stream.next_in=self->dec_buf;
+        }
+        
+        avail_out_back=self->d_stream.avail_out;
+        ret=inflate(&self->d_stream,Z_NO_FLUSH);
+        if (ret==Z_OK){
+            if ((self->d_stream.avail_in==avail_in_back)&&(self->d_stream.avail_out==avail_out_back))
+                return hpatch_FALSE;//error;
+        }else if (ret==Z_STREAM_END){//all end
+            if (self->d_stream.avail_out!=0)
+                return hpatch_FALSE;//error;
+        }else{
+            return hpatch_FALSE;//error;
+        }
+        return hpatch_TRUE;
+    }
+static hpi_BOOL _zlib_TStream_decompress(hpi_TInputStreamHandle diffStream,hpi_byte* out_data,hpi_size_t* data_size){
+    _zlib_TStream* self=(_zlib_TStream*)diffStream;
+    hpi_pos_t r_size=*data_size;
+    if (r_size>self->uncompressSize){
+        r_size=self->uncompressSize;
+        *data_size=(hpi_pos_t)r_size;
+    }
+    self->uncompressSize-=r_size;
+    self->d_stream.next_out=out_data;
+    self->d_stream.avail_out=(uInt)r_size;
+    assert(self->d_stream.avail_out==r_size);
+    while (self->d_stream.avail_out>0) {
+        if (!__zlib_TStream_inflate(self))
+            return hpatch_FALSE;//error;
+    }
+    return hpatch_TRUE;
+}
+#endif
 
 int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewFileName,size_t patchCacheSize){
     int     result=HPATCHI_SUCCESS;
@@ -285,11 +360,15 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     hpatch_TFileStreamOutput    newData;
     hpatch_TFileStreamInput     diffData;
     hpatch_TFileStreamInput     oldData;
-    hpatch_TStreamInput* poldData=&oldData.base;
-    hpi_byte*            temp_cache=0;
-    TPatchListener       patchListener;
+    hpi_byte*           pmem=0;
+    hpi_byte*           temp_cache;
+    TPatchListener      patchListener;
+    hpi_compressType    compress_type;
 #ifdef _CompressPlugin_tuz
-    tuz_TStream          tuzStream;
+    tuz_TStream         tuzStream;
+#endif
+#ifdef _CompressPlugin_zlib
+    _zlib_TStream       zlibStream;
 #endif
 
     patchListener.result=HPATCHI_SUCCESS;
@@ -311,14 +390,13 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
               HPATCHI_OPENREAD_ERROR,"open diffFile for read");
     }
     printf("oldDataSize : %" PRIu64 "\ndiffDataSize: %" PRIu64 "\n",
-           poldData->streamSize,diffData.base.streamSize);
+           oldData.base.streamSize,diffData.base.streamSize);
 
     patchListener.base.diff_data=diffData.m_file;
     patchListener.base.read_diff=_do_readFile;
     {//open diff info
         hpi_pos_t newSize;
         hpi_pos_t uncompressSize;
-        hpi_compressType compress_type;
         if (!hpatch_lite_open(patchListener.base.diff_data,patchListener.base.read_diff,
                               &compress_type,&newSize,&uncompressSize))
             check(hpatch_FALSE,HPATCHI_PATCH_OPEN_ERROR,"hpatch_lite_open() run");
@@ -329,25 +407,78 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
 
         switch (compress_type){
         case hpi_compressType_no: {
-            temp_cache=(hpi_byte*)malloc(patchCacheSize);
-            check(temp_cache,HPATCHI_MEM_ERROR,"alloc cache memory");
+            printf("hpatchi run with decompresser: \"\"\n");
+            pmem=(hpi_byte*)malloc(patchCacheSize);
+            check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");
+            temp_cache=pmem;
         } break;
-      #ifdef _CompressPlugin_tuz
+    #ifdef _CompressPlugin_tuz
         case hpi_compressType_tuz: {
+            size_t allMemSize;
             const size_t stepSize=patchCacheSize/3;
             const tuz_size_t dictSize=tuz_TStream_read_dict_size(patchListener.base.diff_data,patchListener.base.read_diff);
-            check(((tuz_size_t)(dictSize-1))<tuz_kMaxOfDictSize,HPATCHI_PATCH_DICT_ERROR,"tuz_TStream_read_dict_size() dict size");
+            printf("hpatchi run with decompresser: \"tuz\"\n");
+            check(((tuz_size_t)(dictSize-1))<tuz_kMaxOfDictSize,HPATCHI_DECOMPRESSER_DICT_ERROR,"tuz_TStream_read_dict_size() dict size");
             assert(stepSize==(tuz_size_t)stepSize);
-            temp_cache=(hpi_byte*)malloc(dictSize+stepSize*3);
-            check(temp_cache,HPATCHI_MEM_ERROR,"alloc cache memory");
-            if (tuz_OK!=tuz_TStream_open(&tuzStream,patchListener.base.diff_data,patchListener.base.read_diff,
-                                            temp_cache+stepSize*2,dictSize,(tuz_size_t)stepSize))
-                check(hpatch_FALSE,HPATCHI_OPENDECOMPRESSER_ERROR,"tuz_TStream_open() run");
+            allMemSize=dictSize+stepSize*3;
+            pmem=(hpi_byte*)malloc(allMemSize);
+            check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");
+            temp_cache=pmem;
+            check(tuz_OK==tuz_TStream_open(&tuzStream,patchListener.base.diff_data,patchListener.base.read_diff,
+                                           temp_cache,dictSize,(tuz_size_t)stepSize),
+                  HPATCHI_DECOMPRESSER_OPEN_ERROR,"tuz_TStream_open()");
+            temp_cache+=stepSize+dictSize;
+
             patchCacheSize=stepSize*2;
             patchListener.base.diff_data=&tuzStream;
             patchListener.base.read_diff=_do_tuz_decompress;
         } break;
-      #endif // _CompressPlugin_tuz
+    #endif // _CompressPlugin_tuz
+    #ifdef _CompressPlugin_zlib
+        case hpi_compressType_zlib: {
+            size_t allMemSize;
+            const size_t stepSize=patchCacheSize/3;
+            int         dictBits;
+            signed char windowBits;
+            hpi_size_t  rlen=1;
+            printf("hpatchi run with decompresser: \"zlib\"\n");
+            check(patchListener.base.read_diff(patchListener.base.diff_data,(hpi_byte*)&windowBits,&rlen)
+                  &&(rlen==1),HPATCHI_DECOMPRESSER_DICT_ERROR,"read windowBits from diffData");
+            dictBits=(int)windowBits;
+            if (dictBits<0) dictBits=-dictBits;
+            if (dictBits>15) dictBits-=16;
+            check((dictBits>=9)&(dictBits<=15),HPATCHI_DECOMPRESSER_DICT_ERROR,
+                  "readed windowBits value from diffData");
+            
+            memset(&zlibStream,0,sizeof(zlibStream));
+            zlibStream.code_stream=patchListener.base.diff_data;
+            zlibStream.read_code=patchListener.base.read_diff;
+            zlibStream.uncompressSize=uncompressSize;
+            zlibStream.d_stream.opaque=&zlibStream;
+            zlibStream.d_stream.zalloc=_zlib_TStream_malloc;
+            zlibStream.d_stream.zfree=_zlib_TStream_free;
+
+            assert(stepSize==(hpi_size_t)stepSize);
+            zlibStream.zlib_mem_size=sizeof(struct inflate_state)+((size_t)1<<dictBits);
+            allMemSize=zlibStream.zlib_mem_size+stepSize*3;
+            pmem=(hpi_byte*)malloc(allMemSize);
+            check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");
+            temp_cache=pmem;
+
+            zlibStream.zlib_mem=temp_cache;
+            temp_cache+=zlibStream.zlib_mem_size;
+            zlibStream.dec_buf=temp_cache;
+            zlibStream.dec_buf_size=(hpi_size_t)stepSize;
+            temp_cache+=stepSize;
+
+            check(Z_OK==inflateInit2(&zlibStream.d_stream,(int)windowBits),
+                  HPATCHI_DECOMPRESSER_OPEN_ERROR,"zlib inflateInit2()");
+
+            patchCacheSize=stepSize*2;
+            patchListener.base.diff_data=&zlibStream;
+            patchListener.base.read_diff=_zlib_TStream_decompress;
+        } break;
+    #endif // _CompressPlugin_zlib
         default: {
             LOG_ERR("unknow compress_type \"%d\" ERROR!\n",(int)compress_type);
             check(hpatch_FALSE,HPATCHI_COMPRESSTYPE_ERROR,"diff info");
@@ -374,7 +505,12 @@ clear:
     check(hpatch_TFileStreamOutput_close(&newData),HPATCHI_FILECLOSE_ERROR,"out newFile close");
     check(hpatch_TFileStreamInput_close(&diffData),HPATCHI_FILECLOSE_ERROR,"diffFile close");
     check(hpatch_TFileStreamInput_close(&oldData),HPATCHI_FILECLOSE_ERROR,"oldFile close");
-    _free_mem(temp_cache);
+#ifdef _CompressPlugin_zlib
+    if ((hpi_compressType_zlib==compress_type)&&(zlibStream.d_stream.state!=0)){
+        check(Z_OK==inflateEnd(&zlibStream.d_stream),HPATCHI_DECOMPRESSER_CLOSE_ERROR,"zlib inflateEnd()");
+    }
+#endif
+    _free_mem(pmem);
     printf("\nhpatchi time: %.3f s\n",(clock_s()-time0));
     return result;
 }

@@ -1,10 +1,10 @@
 # [HPatchLite](https://github.com/sisong/HPatchLite)
-[![release](https://img.shields.io/badge/release-v0.2.0-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/HPatchLite/blob/master/LICENSE) 
+[![release](https://img.shields.io/badge/release-v0.3.0-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/HPatchLite/blob/main/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/HPatchLite/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/HPatchLite?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/HPatchLite/issues)   
 
-[![Build Status](https://github.com/sisong/HPatchLite/workflows/ci/badge.svg?branch=master)](https://github.com/sisong/HPatchLite/actions?query=workflow%3Aci+branch%3Amaster)   
+[![Build Status](https://github.com/sisong/HPatchLite/workflows/ci/badge.svg?branch=main)](https://github.com/sisong/HPatchLite/actions?query=workflow%3Aci+branch%3Amain)   
 
  english | [中文版](README_cn.md)   
 

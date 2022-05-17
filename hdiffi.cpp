@@ -31,9 +31,9 @@
 #if (_IS_NEED_DEFAULT_CompressPlugin)
 //===== select needs decompress plugins or change to your plugin=====
 #   define _CompressPlugin_tuz    // decompress requires tiny code(.text) & ram
-//#   define _CompressPlugin_zlib
-//#   define _CompressPlugin_lzma   // better compresser
-//#   define _CompressPlugin_lzma2  // better compresser
+#   define _CompressPlugin_zlib
+#   define _CompressPlugin_lzma   // better compresser
+#   define _CompressPlugin_lzma2  // better compresser
 #endif
 
 #include "HDiffPatch/compress_plugin_demo.h"
@@ -176,7 +176,7 @@ static hpi_BOOL findDecompress(hpatch_TDecompress** out_decompressPlugin,hpi_com
         case hpi_compressType_tuz: *out_decompressPlugin=&tuzDecompressPlugin; return hpi_TRUE;
       #endif
       #ifdef  _CompressPlugin_zlib
-        case hpi_compressType_no: *out_decompressPlugin=&zlibDecompressPlugin; return hpi_TRUE;
+        case hpi_compressType_zlib: *out_decompressPlugin=&zlibDecompressPlugin; return hpi_TRUE;
       #endif
       #ifdef  _CompressPlugin_lzma
         case hpi_compressType_lzma: *out_decompressPlugin=&lzmaDecompressPlugin; return hpi_TRUE;
