@@ -165,7 +165,7 @@ int main(int argc,char* argv[]){
 #   endif
 #endif
 
-static hpi_BOOL findDecompress(hpatch_TDecompress** out_decompressPlugin,hpi_compressType compressType){
+static hpi_BOOL findDecompressByHDP(hpatch_TDecompress** out_decompressPlugin,hpi_compressType compressType){
     switch (compressType){
         case hpi_compressType_no: *out_decompressPlugin=0; return hpi_TRUE;
       #ifdef  _CompressPlugin_tuz
@@ -500,6 +500,10 @@ static hpi_BOOL readFileAll(hdiff_private::TAutoMem& out_mem,const char* fileNam
     std::string erri=std::string()+errorInfo+" ERROR!\n"; \
     if (!(value)){ hpatch_printStdErrPath_utf8(erri.c_str()); _check_on_error(errorType); } }
 
+static bool check_lite_diff_by_hpatchi(const hpi_byte* newData,const hpi_byte* newData_end,
+                                       const hpi_byte* oldData,const hpi_byte* oldData_end,
+                                       const hpi_byte* lite_diff,const hpi_byte* lite_diff_end);
+
 static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const char* outDiffFileName,
                          const hdiffi_TCompress* compressPlugin,const TDiffiSets& diffSets){
     double diff_time0=clock_s();
@@ -530,7 +534,7 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
             check(hpatch_TFileStreamOutput_close(&diffData_out),HDIFFI_FILECLOSE_ERROR,"out diffFile close");
         }
         printf("diffDataSize: %" PRIu64 "\n",(hpatch_StreamPos_t)outDiffData.size());
-        printf("diff    time: %.3f s\n",(clock_s()-diff_time0));
+        printf("hdiffi  time: %.3f s\n",(clock_s()-diff_time0));
         printf("  out diff file ok!\n");
     }
     if (diffSets.isDoPatchCheck){
@@ -543,23 +547,22 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
             printf("diffDataSize: %" PRIu64 "\n",(hpatch_StreamPos_t)diffMem.size());
         }
         hpatch_TDecompress* saved_decompressPlugin;
-        {
+        if (0){ // check diffData by HDiffPatch
             hpi_compressType    compressType;
             if (!check_lite_diff_open(diffMem.data(),diffMem.data_end(),&compressType))
                 check(hpi_FALSE,HDIFFI_PATCH_ERROR,"check_lite_diff_open()");
-            check(findDecompress(&saved_decompressPlugin,compressType),
+            check(findDecompressByHDP(&saved_decompressPlugin,compressType),
                   HDIFFI_PATCH_ERROR,"diff data saved compress type");
-            
-            size_t reservedMemSize=getPatchReservedMemSize(diffMem.data(),diffMem.data_end());
-            check(reservedMemSize!=_kNULL_SIZE,HDIFFI_PATCH_ERROR,"hpatchi can't open diffData");
-            printf("  hpatchi requirements memory size: %" PRIu64 " + patchBufSize\n",(hpatch_StreamPos_t)reservedMemSize);
-        }
-        {
+
             check(check_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
                                   diffMem.data(),diffMem.data_end(),saved_decompressPlugin),
                   HDIFFI_PATCH_ERROR,"check_lite_diff()");
+        }else{ // check diffData by HPatchLite
+            check(check_lite_diff_by_hpatchi(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
+                                             diffMem.data(),diffMem.data_end()),
+                  HDIFFI_PATCH_ERROR,"check_lite_diff_by_hpatchi()");
         }
-        printf("patch   time: %.3f s\n",(clock_s()-patch_time0));
+        printf("hpatchi time: %.3f s\n",(clock_s()-patch_time0));
         printf("  patch check diff data ok!\n");
     }
 clear:
@@ -588,4 +591,64 @@ int hdiffi(const char* oldFileName,const char* newFileName,const char* outDiffFi
     if (diffSets.isDoDiff && diffSets.isDoPatchCheck)
         printf("\nall   time: %.3f s\n",(clock_s()-time0));
     return exitCode;
+}
+
+
+// check_lite_diff_by_hpatchi
+
+struct TPatchiChecker{
+    hpatchi_listener_t base;
+    const hpi_byte* newData_cur;
+    const hpi_byte* newData_end;
+    const hpi_byte* oldData;
+    const hpi_byte* oldData_end;
+    const hpi_byte* diffData_cur;
+    const hpi_byte* diffData_end;
+
+    static hpi_BOOL _read_diff(hpi_TInputStreamHandle inputStream,hpi_byte* out_data,hpi_size_t* data_size){
+        TPatchiChecker& self=*(TPatchiChecker*)inputStream;
+        const hpi_byte* cur=self.diffData_cur;
+        size_t d_size=self.diffData_end-cur;
+        size_t r_size=*data_size;
+        if (r_size>d_size){
+            r_size=d_size;
+            *data_size=(hpi_size_t)r_size;
+        }
+        memcpy(out_data,cur,r_size);
+        self.diffData_cur=cur+r_size;
+        return hpi_TRUE;
+    }
+    static hpi_BOOL _read_old(struct hpatchi_listener_t* listener,hpi_pos_t read_from_pos,hpi_byte* out_data,hpi_size_t data_size){
+        TPatchiChecker& self=*(TPatchiChecker*)listener;
+        size_t dsize=self.oldData_end-self.oldData;
+        if ((read_from_pos>dsize)|(data_size>(size_t)(dsize-read_from_pos))) return hpi_FALSE;
+        memcpy(out_data,self.oldData+(size_t)read_from_pos,data_size);
+        return hpi_TRUE;
+    }
+    static hpi_BOOL _write_new(struct hpatchi_listener_t* listener,const hpi_byte* data,hpi_size_t data_size){
+        TPatchiChecker& self=*(TPatchiChecker*)listener;
+        if (data_size>(size_t)(self.newData_end-self.newData_cur)) 
+            return hpi_FALSE;
+        if (0!=memcmp(self.newData_cur,data,data_size))
+            return hpi_FALSE;
+        self.newData_cur+=data_size;
+        return hpi_TRUE;
+    }
+};
+
+static bool check_lite_diff_by_hpatchi(const hpi_byte* newData,const hpi_byte* newData_end,
+                                       const hpi_byte* oldData,const hpi_byte* oldData_end,
+                                       const hpi_byte* lite_diff,const hpi_byte* lite_diff_end){
+    hpi_compressType    compress_type;
+    hpi_pos_t           newSize;
+    hpi_pos_t           uncompressSize;
+    TPatchiChecker     listener={{&listener,TPatchiChecker::_read_diff,TPatchiChecker::_read_old,TPatchiChecker::_write_new},
+                                  newData,newData_end,oldData,oldData_end,lite_diff,lite_diff_end};
+
+    if (!hpatch_lite_open(listener.base.diff_data,listener.base.read_diff,
+                          &compress_type,&newSize,&uncompressSize)) return hpi_FALSE;
+    if (newSize!=(size_t)(newData_end-newData)) return hpi_FALSE;
+    size_t patchCacheSize=kDecompressBufSize;
+    if (0!=hpatchi_patch(&listener.base,compress_type,newSize,uncompressSize,patchCacheSize)) return hpi_FALSE;
+    return listener.newData_cur==listener.newData_end;
 }

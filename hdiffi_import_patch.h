@@ -6,6 +6,7 @@
  */
 #ifndef hdiffi_import_patch_h
 #define hdiffi_import_patch_h
+#include "HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -297,12 +297,11 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
                   hpi_pos_t uncompressSize,size_t patchCacheSize){
     int     result=HPATCHI_SUCCESS;
     int     _isInClear=hpatch_FALSE;
-    double  time0=clock_s();
-    hpi_byte*           pmem=0;
-    hpi_byte*           temp_cache;
+    hpi_byte*       pmem=0;
+    hpi_byte*       temp_cache;
     // patchCacheSize 1/4 for decompress input buf, 3/4 for patch buf
-    const size_t        decBufSize=(patchCacheSize>=4)?(patchCacheSize>>2):1;
-    size_t              patchBufSize=(patchCacheSize-decBufSize)>>1<<1;
+    const size_t    decBufSize=(patchCacheSize>=4)?(patchCacheSize>>2):1;
+    size_t          patchBufSize=(patchCacheSize-decBufSize)>>1<<1;
 #ifdef _CompressPlugin_tuz
     tuz_TStream     tuzStream;
 #endif
@@ -378,7 +377,6 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
     
     check(hpatch_lite_patch(listener,newSize,temp_cache,(hpi_size_t)patchBufSize),
           HPATCHI_PATCH_ERROR,"hpatch_lite_patch() run");
-    printf("  patch ok!\n");
 
 clear:
     _isInClear=hpatch_TRUE;
@@ -392,13 +390,13 @@ clear:
     if (hpi_compressType_lzma2==compress_type) _closeDecompresser(&lzma2Stream,"lzma2",_lzma2_TStream_close);
 #endif
     _free_mem(pmem);
-    printf("\nhpatchi time: %.3f s\n",(clock_s()-time0));
     return result;
 }
 
 int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewFileName,size_t patchCacheSize){
     int     result=HPATCHI_SUCCESS;
     int     _isInClear=hpatch_FALSE;
+    double  time0=clock_s();
     hpatch_TFileStreamOutput    newData;
     hpatch_TFileStreamInput     diffData;
     hpatch_TFileStreamInput     oldData;
@@ -446,13 +444,14 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     patchListener.base.write_new=_do_writeNew;
     {
         int patchret=hpatchi_patch(&patchListener.base,compress_type,(hpi_pos_t)newData.base.streamSize,
-                                 uncompressSize,patchCacheSize);
+                                   uncompressSize,patchCacheSize);
         if (patchret!=HPATCHI_SUCCESS){
             check(patchListener.result==HPATCHI_SUCCESS,patchListener.result,"patchListener");
             check(!oldData.fileError,HPATCHI_FILEREAD_ERROR,"oldFile read");
             //check(!diffData.fileError,HPATCHI_FILEREAD_ERROR,"diffFile read");
             check(hpatch_FALSE,patchret,"hpatchi_patch() run");
         }
+        printf("  patch ok!\n");
     }
 
 clear:
@@ -460,6 +459,7 @@ clear:
     check(hpatch_TFileStreamOutput_close(&newData),HPATCHI_FILECLOSE_ERROR,"out newFile close");
     check(hpatch_TFileStreamInput_close(&diffData),HPATCHI_FILECLOSE_ERROR,"diffFile close");
     check(hpatch_TFileStreamInput_close(&oldData),HPATCHI_FILECLOSE_ERROR,"oldFile close");
+    printf("\nhpatchi time: %.3f s\n",(clock_s()-time0));
     return result;
 }
 
