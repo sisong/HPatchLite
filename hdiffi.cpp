@@ -246,7 +246,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
                                         &compressLevel,1,9,9, &dictBits,9,15,defaultDictBits),"-c-zlib-?"){
         static TCompressPlugin_zlib _zlibCompressPlugin=zlibCompressPlugin;
         _zlibCompressPlugin.compress_level=(int)compressLevel;
-        _zlibCompressPlugin.windowBits=(signed char)(-dictBits);
+        _zlibCompressPlugin.windowBits=-(signed char)dictBits;
         out_compressPlugin->compress=&_zlibCompressPlugin.base;
         out_compressPlugin->compress_type=hpi_compressType_zlib; }}
 #   if (_IS_USED_MULTITHREAD)
@@ -255,7 +255,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
                                         &compressLevel,1,9,6, &dictBits,9,15,defaultDictBits),"-c-pzlib-?"){
         static TCompressPlugin_pzlib _pzlibCompressPlugin=pzlibCompressPlugin;
         _pzlibCompressPlugin.base.compress_level=(int)compressLevel;
-        _pzlibCompressPlugin.base.windowBits=(signed char)(-dictBits);
+        _pzlibCompressPlugin.base.windowBits=-(signed char)dictBits;
         out_compressPlugin->compress=&_pzlibCompressPlugin.base.base;
         out_compressPlugin->compress_type=hpi_compressType_zlib; }}
 #   endif // _IS_USED_MULTITHREAD

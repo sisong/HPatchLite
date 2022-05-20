@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>  //fprintf
-#include "HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.h"
+#include "hdiffi_import_patch.h"
 #include "HDiffPatch/_clock_for_demo.h"
 #include "HDiffPatch/_atosize.h"
 #include "HDiffPatch/file_for_patch.h"
