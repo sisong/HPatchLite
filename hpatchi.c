@@ -7,7 +7,6 @@
  */
 
 #include <string.h>
-#include <stdlib.h>
 #include <stdio.h>  //fprintf
 #include "hdiffi_import_patch.h"
 #include "HDiffPatch/_clock_for_demo.h"
@@ -65,7 +64,7 @@ typedef enum THPatchiResult {
     HPATCHI_OPENREAD_ERROR,
     HPATCHI_OPENWRITE_ERROR,
     HPATCHI_FILEREAD_ERROR,// 5
-    HPATCHI_FILEWRITE_ERROR, 
+    HPATCHI_FILEWRITE_ERROR,
     HPATCHI_FILEDATA_ERROR,
     HPATCHI_FILECLOSE_ERROR,
     HPATCHI_MEM_ERROR,
@@ -323,7 +322,7 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
             patchBufSize=patchCacheSize;
             printf("  requirements memory size: (must) %" PRIu64 " + (cache) %" PRIu64 "\n",
                    (hpatch_StreamPos_t)0,(hpatch_StreamPos_t)(decBufSize+patchBufSize));
-            pmem=(hpi_byte*)malloc(patchCacheSize); 
+            pmem=(hpi_byte*)malloc(patchCacheSize);
             check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");
             temp_cache=pmem;
         } break;
@@ -335,13 +334,13 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
             assert(decBufSize==(tuz_size_t)decBufSize);
             reservedMemSize=_tuz_TStream_getReservedMemSize(listener->diff_data,listener->read_diff);
             check(reservedMemSize>0,HPATCHI_DECOMPRESSER_DICT_ERROR,"tuz_TStream_read_dict_size() dict size");
-            
+
             decompressMemSize=reservedMemSize+decBufSize;
             printf("  requirements memory size: (must) %" PRIu64 " + (cache) %" PRIu64 "\n",
                    (hpatch_StreamPos_t)reservedMemSize,(hpatch_StreamPos_t)(decBufSize+patchBufSize));
             pmem=(hpi_byte*)malloc(decompressMemSize+patchBufSize);
             check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");
-            
+
             check(tuz_OK==tuz_TStream_open(&tuzStream,listener->diff_data,listener->read_diff,
                                             pmem,(tuz_size_t)reservedMemSize,(tuz_size_t)decBufSize),
                     HPATCHI_DECOMPRESSER_OPEN_ERROR,"tuz_TStream_open()");
@@ -374,7 +373,7 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
             check(hpatch_FALSE,HPATCHI_COMPRESSTYPE_ERROR,"diff info");
         } }
     }
-    
+
     check(hpatch_lite_patch(listener,newSize,temp_cache,(hpi_size_t)patchBufSize),
           HPATCHI_PATCH_ERROR,"hpatch_lite_patch() run");
 
@@ -403,7 +402,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     TPatchListener      patchListener;
     hpi_compressType    compress_type;
     hpi_pos_t           uncompressSize;
-    
+
     patchListener.result=HPATCHI_SUCCESS;
     hpatch_TFileStreamInput_init(&oldData);
     hpatch_TFileStreamInput_init(&diffData);
@@ -437,7 +436,7 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
         check(hpatch_TFileStreamOutput_open(&newData,outNewFileName,newSize),
               HPATCHI_OPENWRITE_ERROR,"open out newFile for write");
     }
-    
+
     patchListener.old_file=&oldData.base;
     patchListener.base.read_old=_do_readOld;
     patchListener.new_file=newData.m_file;

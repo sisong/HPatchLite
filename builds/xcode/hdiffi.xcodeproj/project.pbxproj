@@ -28,6 +28,11 @@
 		0DB0B08B2832276B007DC717 /* adler_roll.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B07B2832276B007DC717 /* adler_roll.c */; };
 		0DB0B08C2832276B007DC717 /* match_block.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B0802832276B007DC717 /* match_block.cpp */; };
 		0DB0B08D2832276B007DC717 /* diff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B0812832276B007DC717 /* diff.cpp */; };
+		0DB0B09328322977007DC717 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DB0B09228322977007DC717 /* libz.tbd */; };
+		0DB0B09828322A17007DC717 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DB0B09728322A17007DC717 /* liblzma.a */; };
+		0DB0B09F28322BA1007DC717 /* compress_parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B09928322BA1007DC717 /* compress_parallel.cpp */; };
+		0DB0B0A028322BA1007DC717 /* parallel_channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B09B28322BA1007DC717 /* parallel_channel.cpp */; };
+		0DB0B0A128322BA1007DC717 /* parallel_import.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B09D28322BA1007DC717 /* parallel_import.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -94,6 +99,13 @@
 		0DB0B07F2832276B007DC717 /* mem_buf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mem_buf.h; sourceTree = "<group>"; };
 		0DB0B0802832276B007DC717 /* match_block.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = match_block.cpp; sourceTree = "<group>"; };
 		0DB0B0812832276B007DC717 /* diff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = diff.cpp; sourceTree = "<group>"; };
+		0DB0B09228322977007DC717 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		0DB0B09728322A17007DC717 /* liblzma.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = liblzma.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DB0B09928322BA1007DC717 /* compress_parallel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = compress_parallel.cpp; path = ../../HDiffPatch/compress_parallel.cpp; sourceTree = "<group>"; };
+		0DB0B09B28322BA1007DC717 /* parallel_channel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parallel_channel.cpp; sourceTree = "<group>"; };
+		0DB0B09C28322BA1007DC717 /* parallel_import.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parallel_import.h; sourceTree = "<group>"; };
+		0DB0B09D28322BA1007DC717 /* parallel_import.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parallel_import.cpp; sourceTree = "<group>"; };
+		0DB0B09E28322BA1007DC717 /* parallel_channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parallel_channel.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +113,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DB0B09828322A17007DC717 /* liblzma.a in Frameworks */,
+				0DB0B09328322977007DC717 /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +129,7 @@
 				0DB0B03F283226D6007DC717 /* hdiffi_import_patch.c */,
 				0DB0B040283226D6007DC717 /* hdiffi.cpp */,
 				0DB0B03628322547007DC717 /* Products */,
+				0DB0B09128322977007DC717 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -142,10 +157,12 @@
 		0DB0B05028322728007DC717 /* hdiffpatch */ = {
 			isa = PBXGroup;
 			children = (
+				0DB0B09A28322BA1007DC717 /* libParallel */,
 				0DB0B05E2832276B007DC717 /* HDiff */,
 				0DB0B0532832276B007DC717 /* HPatch */,
 				0DB0B0592832276B007DC717 /* HPatchLite */,
 				0DB0B05128322742007DC717 /* file_for_patch.c */,
+				0DB0B09928322BA1007DC717 /* compress_parallel.cpp */,
 			);
 			name = hdiffpatch;
 			sourceTree = "<group>";
@@ -239,6 +256,27 @@
 			path = limit_mem_diff;
 			sourceTree = "<group>";
 		};
+		0DB0B09128322977007DC717 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0DB0B09728322A17007DC717 /* liblzma.a */,
+				0DB0B09228322977007DC717 /* libz.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		0DB0B09A28322BA1007DC717 /* libParallel */ = {
+			isa = PBXGroup;
+			children = (
+				0DB0B09B28322BA1007DC717 /* parallel_channel.cpp */,
+				0DB0B09C28322BA1007DC717 /* parallel_import.h */,
+				0DB0B09D28322BA1007DC717 /* parallel_import.cpp */,
+				0DB0B09E28322BA1007DC717 /* parallel_channel.h */,
+			);
+			name = libParallel;
+			path = ../../HDiffPatch/libParallel;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -299,9 +337,11 @@
 				0DB0B0892832276B007DC717 /* digest_matcher.cpp in Sources */,
 				0DB0B0872832276B007DC717 /* bytes_rle.cpp in Sources */,
 				0DB0B04C2832271E007DC717 /* tuz_enc_code.cpp in Sources */,
+				0DB0B0A128322BA1007DC717 /* parallel_import.cpp in Sources */,
 				0DB0B0852832276B007DC717 /* divsufsort64.c in Sources */,
 				0DB0B04E2832271E007DC717 /* tuz_enc_clip.cpp in Sources */,
 				0DB0B04728322706007DC717 /* tuz_enc.cpp in Sources */,
+				0DB0B0A028322BA1007DC717 /* parallel_channel.cpp in Sources */,
 				0DB0B0862832276B007DC717 /* compress_detect.cpp in Sources */,
 				0DB0B0832832276B007DC717 /* hpatch_lite.c in Sources */,
 				0DB0B05228322742007DC717 /* file_for_patch.c in Sources */,
@@ -314,6 +354,7 @@
 				0DB0B08C2832276B007DC717 /* match_block.cpp in Sources */,
 				0DB0B0822832276B007DC717 /* patch.c in Sources */,
 				0DB0B0882832276B007DC717 /* suffix_string.cpp in Sources */,
+				0DB0B09F28322BA1007DC717 /* compress_parallel.cpp in Sources */,
 				0DB0B0842832276B007DC717 /* divsufsort.c in Sources */,
 				0DB0B045283226F4007DC717 /* tuz_dec.c in Sources */,
 				0DB0B08D2832276B007DC717 /* diff.cpp in Sources */,
@@ -377,6 +418,8 @@
 				HEADER_SEARCH_PATHS = (
 					../../tinyuz/decompress,
 					../../tinyuz/compress,
+					../../lzma/C,
+					../../zlib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -437,6 +480,8 @@
 				HEADER_SEARCH_PATHS = (
 					../../tinyuz/decompress,
 					../../tinyuz/compress,
+					../../lzma/C,
+					../../zlib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;

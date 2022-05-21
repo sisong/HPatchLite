@@ -28,12 +28,15 @@
     }
 #endif //_CompressPlugin_tuz
 
-
 #ifdef _CompressPlugin_zlib
 #if (_IsNeedIncludeDefaultCompressHead)
-#   include "zutil.h"  // http://zlib.net/  https://github.com/madler/zlib
-#   include "inftrees.h" //for code
-#   include "inflate.h" //for inflate_state
+#define Byte __Byte
+#   include "zlib.h" // http://zlib.net/  https://github.com/madler/zlib
+#undef Byte
+#define ZLIB_INTERNAL 
+#   include "inftrees.h" //for code 
+#undef ZLIB_INTERNAL
+#   include "inflate.h" //for inflate_state 
 #endif
     typedef struct zlib_TStream{
         hpi_TInputStreamHandle  codeStream;

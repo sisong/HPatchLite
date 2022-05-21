@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../../HDiffPatch/builds/xcode/lzma.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:hdiffi.xcodeproj">
    </FileRef>
    <FileRef
