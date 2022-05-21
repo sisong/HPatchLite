@@ -72,19 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\tinyuz\decompress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -160,6 +160,7 @@
     <ClCompile Include="..\..\HDiffPatch\file_for_patch.c" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatchLite\hpatch_lite.c" />
     <ClCompile Include="..\..\hpatchi.c" />
+    <ClCompile Include="..\..\tinyuz\decompress\tuz_dec.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\HDiffPatch\builds\vc2019\lzma.vcxproj">
@@ -167,9 +168,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\HDiffPatch\builds\vc2019\zlib.vcxproj">
       <Project>{35ed7715-6b17-4225-8171-c954968d8f8c}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\tinyuz\builds\vc2019\libtinyuz.vcxproj">
-      <Project>{6609e1cf-8dae-41e9-bc20-1574e49ec91b}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

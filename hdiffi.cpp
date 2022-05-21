@@ -31,9 +31,9 @@
 #if (_IS_NEED_DEFAULT_CompressPlugin)
 //===== select needs decompress plugins or change to your plugin=====
 #   define _CompressPlugin_tuz    // decompress requires tiny code(.text) & ram
-//#   define _CompressPlugin_zlib
-//#   define _CompressPlugin_lzma   // better compresser
-//#   define _CompressPlugin_lzma2  // better compresser
+#   define _CompressPlugin_zlib
+#   define _CompressPlugin_lzma   // better compresser
+#   define _CompressPlugin_lzma2  // better compresser
 #endif
 
 #include "HDiffPatch/compress_plugin_demo.h"
@@ -138,8 +138,7 @@ struct TDiffiSets{
 };
 
 int hdiffi(const char* oldFileName,const char* newFileName,const char* outDiffFileName,
-           const hdiffi_TCompress* compressPlugin,hpatch_TDecompress* decompressPlugin,
-           const TDiffiSets& diffSets);
+           const hdiffi_TCompress* compressPlugin,const TDiffiSets& diffSets);
 
 #define _checkPatchMode(_argc,_argv)            \
     if (isSwapToPatchMode(_argc,_argv)){        \
@@ -166,17 +165,14 @@ int main(int argc,char* argv[]){
 #   endif
 #endif
 
-#define __setDecompress(_decompressPlugin) \
-    if (_trySetDecompress(out_decompressPlugin,compressType,_decompressPlugin)) return hpi_TRUE;
-
-static hpi_BOOL findDecompress(hpatch_TDecompress** out_decompressPlugin,hpi_compressType compressType){
+static hpi_BOOL findDecompressByHDP(hpatch_TDecompress** out_decompressPlugin,hpi_compressType compressType){
     switch (compressType){
         case hpi_compressType_no: *out_decompressPlugin=0; return hpi_TRUE;
       #ifdef  _CompressPlugin_tuz
         case hpi_compressType_tuz: *out_decompressPlugin=&tuzDecompressPlugin; return hpi_TRUE;
       #endif
       #ifdef  _CompressPlugin_zlib
-        case hpi_compressType_no: *out_decompressPlugin=&zlibDecompressPlugin; return hpi_TRUE;
+        case hpi_compressType_zlib: *out_decompressPlugin=&zlibDecompressPlugin; return hpi_TRUE;
       #endif
       #ifdef  _CompressPlugin_lzma
         case hpi_compressType_lzma: *out_decompressPlugin=&lzmaDecompressPlugin; return hpi_TRUE;
@@ -234,7 +230,6 @@ static bool _tryGetCompressSet(const char** isMatchedType,const char* ptype,cons
         if (isMatchedType)
 
 static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
-                             hpatch_TDecompress** out_decompressPlugin,
                              const char* ptype,const char* ptypeEnd){
     const char* isMatchedType=0;
     size_t      compressLevel=0;
@@ -251,20 +246,18 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
                                         &compressLevel,1,9,9, &dictBits,9,15,defaultDictBits),"-c-zlib-?"){
         static TCompressPlugin_zlib _zlibCompressPlugin=zlibCompressPlugin;
         _zlibCompressPlugin.compress_level=(int)compressLevel;
-        _zlibCompressPlugin.windowBits=(signed char)(-dictBits);
+        _zlibCompressPlugin.windowBits=-(signed char)dictBits;
         out_compressPlugin->compress=&_zlibCompressPlugin.base;
-        out_compressPlugin->compress_type=hpi_compressType_zlib;
-        *out_decompressPlugin=&zlibDecompressPlugin; }}
+        out_compressPlugin->compress_type=hpi_compressType_zlib; }}
 #   if (_IS_USED_MULTITHREAD)
     //pzlib
     __getCompressSet(_tryGetCompressSet(&isMatchedType,ptype,ptypeEnd,"pzlib",0,
                                         &compressLevel,1,9,6, &dictBits,9,15,defaultDictBits),"-c-pzlib-?"){
         static TCompressPlugin_pzlib _pzlibCompressPlugin=pzlibCompressPlugin;
         _pzlibCompressPlugin.base.compress_level=(int)compressLevel;
-        _pzlibCompressPlugin.base.windowBits=(signed char)(-dictBits);
+        _pzlibCompressPlugin.base.windowBits=-(signed char)dictBits;
         out_compressPlugin->compress=&_pzlibCompressPlugin.base.base;
-        out_compressPlugin->compress_type=hpi_compressType_zlib;
-        *out_decompressPlugin=&zlibDecompressPlugin; }}
+        out_compressPlugin->compress_type=hpi_compressType_zlib; }}
 #   endif // _IS_USED_MULTITHREAD
 #endif
 #ifdef _CompressPlugin_lzma
@@ -275,8 +268,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
         _lzmaCompressPlugin.compress_level=(int)compressLevel;
         _lzmaCompressPlugin.dict_size=(int)dictSize;
         out_compressPlugin->compress=&_lzmaCompressPlugin.base;
-        out_compressPlugin->compress_type=hpi_compressType_lzma;
-        *out_decompressPlugin=&lzmaDecompressPlugin; }}
+        out_compressPlugin->compress_type=hpi_compressType_lzma; }}
 #endif
 #ifdef _CompressPlugin_lzma2
     __getCompressSet(_tryGetCompressSet(&isMatchedType,ptype,ptypeEnd,"lzma2",0,
@@ -286,8 +278,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
         _lzma2CompressPlugin.compress_level=(int)compressLevel;
         _lzma2CompressPlugin.dict_size=(int)dictSize;
         out_compressPlugin->compress=&_lzma2CompressPlugin.base;
-        out_compressPlugin->compress_type=hpi_compressType_lzma2;
-        *out_decompressPlugin=&lzma2DecompressPlugin; }}
+        out_compressPlugin->compress_type=hpi_compressType_lzma2; }}
 #endif
 #ifdef _CompressPlugin_tuz
     __getCompressSet(_tryGetCompressSet(&isMatchedType,
@@ -296,11 +287,10 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
         static TCompressPlugin_tuz _tuzCompressPlugin=tuzCompressPlugin;
         _tuzCompressPlugin.props.dictSize=(tuz_size_t)dictSize;
         out_compressPlugin->compress=&_tuzCompressPlugin.base;
-        out_compressPlugin->compress_type=hpi_compressType_tuz;
-        *out_decompressPlugin=&tuzDecompressPlugin; }}
+        out_compressPlugin->compress_type=hpi_compressType_tuz; }}
 #endif
 
-    _options_check((out_compressPlugin->compress!=0)&&(*out_decompressPlugin!=0),"-c-?");
+    _options_check((out_compressPlugin->compress!=0),"-c-?");
     return HDIFFI_SUCCESS;
 }
 
@@ -328,7 +318,6 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
     hpi_BOOL isOldFileInputEmpty=_kNULL_VALUE;
     size_t      threadNum = _THREAD_NUMBER_NULL;
     hdiffi_TCompress      compressPlugin={0,hpi_compressType_no};
-    hpatch_TDecompress*   decompressPlugin=0;
     std::vector<const char *> arg_values;
     if (argc<=1){
         printUsage();
@@ -399,7 +388,7 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
                     _options_check((compressPlugin.compress==0),"-c-");
                     const char* ptype=op+3;
                     const char* ptypeEnd=findUntilEnd(ptype,'-');
-                    int result=_checkSetCompress(&compressPlugin,&decompressPlugin,ptype,ptypeEnd);
+                    int result=_checkSetCompress(&compressPlugin,ptype,ptypeEnd);
                     if (HDIFFI_SUCCESS!=result)
                         return result;
                 }else if (op[2]=='a'){
@@ -484,8 +473,7 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
         _return_check(hpatch_getPathStat(newFile,&newType,0),HDIFFI_PATHTYPE_ERROR,"get newFile type");
         _return_check((newType!=kPathType_notExist),HDIFFI_PATHTYPE_ERROR,"newFile not exist");
 
-        return hdiffi(oldFile,newFile,outDiffFileName,
-                      &compressPlugin,decompressPlugin,diffSets);
+        return hdiffi(oldFile,newFile,outDiffFileName,&compressPlugin,diffSets);
     }
 }
 
@@ -512,9 +500,12 @@ static hpi_BOOL readFileAll(hdiff_private::TAutoMem& out_mem,const char* fileNam
     std::string erri=std::string()+errorInfo+" ERROR!\n"; \
     if (!(value)){ hpatch_printStdErrPath_utf8(erri.c_str()); _check_on_error(errorType); } }
 
+static bool check_lite_diff_by_hpatchi(const hpi_byte* newData,const hpi_byte* newData_end,
+                                       const hpi_byte* oldData,const hpi_byte* oldData_end,
+                                       const hpi_byte* lite_diff,const hpi_byte* lite_diff_end);
+
 static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const char* outDiffFileName,
-                         const hdiffi_TCompress* compressPlugin,hpatch_TDecompress* decompressPlugin,
-                         const TDiffiSets& diffSets){
+                         const hdiffi_TCompress* compressPlugin,const TDiffiSets& diffSets){
     double diff_time0=clock_s();
     int    result=HDIFFI_SUCCESS;
     int    _isInClear=hpi_FALSE;
@@ -543,7 +534,7 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
             check(hpatch_TFileStreamOutput_close(&diffData_out),HDIFFI_FILECLOSE_ERROR,"out diffFile close");
         }
         printf("diffDataSize: %" PRIu64 "\n",(hpatch_StreamPos_t)outDiffData.size());
-        printf("diff    time: %.3f s\n",(clock_s()-diff_time0));
+        printf("hdiffi  time: %.3f s\n",(clock_s()-diff_time0));
         printf("  out diff file ok!\n");
     }
     if (diffSets.isDoPatchCheck){
@@ -556,19 +547,22 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
             printf("diffDataSize: %" PRIu64 "\n",(hpatch_StreamPos_t)diffMem.size());
         }
         hpatch_TDecompress* saved_decompressPlugin;
-        {
+        if (0){ // check diffData by HDiffPatch
             hpi_compressType    compressType;
             if (!check_lite_diff_open(diffMem.data(),diffMem.data_end(),&compressType))
                 check(hpi_FALSE,HDIFFI_PATCH_ERROR,"check_lite_diff_open()");
-            check(findDecompress(&saved_decompressPlugin,compressType),
+            check(findDecompressByHDP(&saved_decompressPlugin,compressType),
                   HDIFFI_PATCH_ERROR,"diff data saved compress type");
-        }
-        {
+
             check(check_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
                                   diffMem.data(),diffMem.data_end(),saved_decompressPlugin),
                   HDIFFI_PATCH_ERROR,"check_lite_diff()");
+        }else{ // check diffData by HPatchLite
+            check(check_lite_diff_by_hpatchi(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
+                                             diffMem.data(),diffMem.data_end()),
+                  HDIFFI_PATCH_ERROR,"check_lite_diff_by_hpatchi()");
         }
-        printf("patch   time: %.3f s\n",(clock_s()-patch_time0));
+        printf("hpatchi time: %.3f s\n",(clock_s()-patch_time0));
         printf("  patch check diff data ok!\n");
     }
 clear:
@@ -578,8 +572,7 @@ clear:
 }
 
 int hdiffi(const char* oldFileName,const char* newFileName,const char* outDiffFileName,
-           const hdiffi_TCompress* compressPlugin,hpatch_TDecompress* decompressPlugin,
-           const TDiffiSets& diffSets){
+           const hdiffi_TCompress* compressPlugin,const TDiffiSets& diffSets){
     double time0=clock_s();
     std::string fnameInfo=std::string("old : \"")+oldFileName+"\"\n"
                                      +"new : \""+newFileName+"\"\n"
@@ -594,9 +587,68 @@ int hdiffi(const char* oldFileName,const char* newFileName,const char* outDiffFi
     
     int exitCode;
     assert(diffSets.isDiffInMem);
-    exitCode=hdiffi_in_mem(oldFileName,newFileName,outDiffFileName,
-                           compressPlugin,decompressPlugin,diffSets);
+    exitCode=hdiffi_in_mem(oldFileName,newFileName,outDiffFileName,compressPlugin,diffSets);
     if (diffSets.isDoDiff && diffSets.isDoPatchCheck)
         printf("\nall   time: %.3f s\n",(clock_s()-time0));
     return exitCode;
+}
+
+
+// check_lite_diff_by_hpatchi
+
+struct TPatchiChecker{
+    hpatchi_listener_t base;
+    const hpi_byte* newData_cur;
+    const hpi_byte* newData_end;
+    const hpi_byte* oldData;
+    const hpi_byte* oldData_end;
+    const hpi_byte* diffData_cur;
+    const hpi_byte* diffData_end;
+
+    static hpi_BOOL _read_diff(hpi_TInputStreamHandle inputStream,hpi_byte* out_data,hpi_size_t* data_size){
+        TPatchiChecker& self=*(TPatchiChecker*)inputStream;
+        const hpi_byte* cur=self.diffData_cur;
+        size_t d_size=self.diffData_end-cur;
+        size_t r_size=*data_size;
+        if (r_size>d_size){
+            r_size=d_size;
+            *data_size=(hpi_size_t)r_size;
+        }
+        memcpy(out_data,cur,r_size);
+        self.diffData_cur=cur+r_size;
+        return hpi_TRUE;
+    }
+    static hpi_BOOL _read_old(struct hpatchi_listener_t* listener,hpi_pos_t read_from_pos,hpi_byte* out_data,hpi_size_t data_size){
+        TPatchiChecker& self=*(TPatchiChecker*)listener;
+        size_t dsize=self.oldData_end-self.oldData;
+        if ((read_from_pos>dsize)|(data_size>(size_t)(dsize-read_from_pos))) return hpi_FALSE;
+        memcpy(out_data,self.oldData+(size_t)read_from_pos,data_size);
+        return hpi_TRUE;
+    }
+    static hpi_BOOL _write_new(struct hpatchi_listener_t* listener,const hpi_byte* data,hpi_size_t data_size){
+        TPatchiChecker& self=*(TPatchiChecker*)listener;
+        if (data_size>(size_t)(self.newData_end-self.newData_cur)) 
+            return hpi_FALSE;
+        if (0!=memcmp(self.newData_cur,data,data_size))
+            return hpi_FALSE;
+        self.newData_cur+=data_size;
+        return hpi_TRUE;
+    }
+};
+
+static bool check_lite_diff_by_hpatchi(const hpi_byte* newData,const hpi_byte* newData_end,
+                                       const hpi_byte* oldData,const hpi_byte* oldData_end,
+                                       const hpi_byte* lite_diff,const hpi_byte* lite_diff_end){
+    hpi_compressType    compress_type;
+    hpi_pos_t           newSize;
+    hpi_pos_t           uncompressSize;
+    TPatchiChecker     listener={{&listener,TPatchiChecker::_read_diff,TPatchiChecker::_read_old,TPatchiChecker::_write_new},
+                                  newData,newData_end,oldData,oldData_end,lite_diff,lite_diff_end};
+
+    if (!hpatch_lite_open(listener.base.diff_data,listener.base.read_diff,
+                          &compress_type,&newSize,&uncompressSize)) return hpi_FALSE;
+    if (newSize!=(size_t)(newData_end-newData)) return hpi_FALSE;
+    size_t patchCacheSize=kDecompressBufSize;
+    if (0!=hpatchi_patch(&listener.base,compress_type,newSize,uncompressSize,patchCacheSize)) return hpi_FALSE;
+    return listener.newData_cur==listener.newData_end;
 }

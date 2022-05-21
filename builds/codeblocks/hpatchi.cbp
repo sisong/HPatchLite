@@ -59,17 +59,25 @@
 			<Add option="-D_LARGEFILE_SOURCE" />
 			<Add option="-D_FILE_OFFSET_BITS=64" />
 			<Add directory="../../tinyuz/decompress" />
+			<Add directory="../../lzma/C" />
+			<Add directory="../../zlib" />
 		</Compiler>
+		<Linker>
+			<Add library="libz" />
+		</Linker>
 		<Unit filename="../../HDiffPatch/file_for_patch.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../../HDiffPatch/libHDiffPatch/HPatch/patch.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../hpatchi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/Lzma2Dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/LzmaDec.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../tinyuz/decompress/tuz_dec.c">

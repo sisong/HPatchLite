@@ -2,8 +2,8 @@
 MT       := 0
 TUZ		 := 1
 # 0: not need zlib;  1: compile zlib source code;  2: used -lz to link zlib lib;
-ZLIB     := 0
-LZMA     := 0
+ZLIB     := 1
+LZMA     := 1
 ARM64ASM := 0
 STATIC_CPP := 0
 # used clang?
@@ -119,9 +119,7 @@ endif
 ifeq ($(ZLIB),0)
 else
     DEF_FLAGS += -D_CompressPlugin_zlib
-	ifeq ($(ZLIB),1)
-        DEF_FLAGS += -I$(ZLIB_PATH)
-	endif
+    DEF_FLAGS += -I$(ZLIB_PATH)
 endif
 ifeq ($(LZMA),0)
 else

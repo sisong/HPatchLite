@@ -62,16 +62,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\tinyuz\decompress;..\..\tinyuz\compress;..\..\zlib;..\..\lzma\C;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -133,6 +133,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\HDiffPatch\compress_parallel.cpp" />
     <ClCompile Include="..\..\HDiffPatch\file_for_patch.c" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\diff.cpp" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\bytes_rle.cpp" />
@@ -146,6 +147,8 @@
     <ClCompile Include="..\..\hdiffi_import_patch.c" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatchLite\hpatch_lite.c" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatch\patch.c" />
+    <ClCompile Include="..\..\HDiffPatch\libParallel\parallel_channel.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libParallel\parallel_import.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

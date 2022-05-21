@@ -63,7 +63,14 @@
 			<Add option="-D_FILE_OFFSET_BITS=64" />
 			<Add directory="../../tinyuz/decompress" />
 			<Add directory="../../tinyuz/compress" />
+			<Add directory="../../lzma/C" />
+			<Add directory="../../zlib" />
 		</Compiler>
+		<Linker>
+			<Add library="pthread" />
+			<Add library="libz" />
+		</Linker>
+		<Unit filename="../../HDiffPatch/compress_parallel.cpp" />
 		<Unit filename="../../HDiffPatch/file_for_patch.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -88,8 +95,40 @@
 		<Unit filename="../../HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../HDiffPatch/libParallel/parallel_channel.cpp" />
+		<Unit filename="../../HDiffPatch/libParallel/parallel_import.cpp" />
 		<Unit filename="../../hdiffi.cpp" />
 		<Unit filename="../../hdiffi_import_patch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/LzFind.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/LzFindMt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/LzFindOpt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/Lzma2Dec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/Lzma2Enc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/LzmaDec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/LzmaEnc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/MtCoder.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/MtDec.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../lzma/C/Threads.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../../tinyuz/compress/tuz_enc.cpp" />
