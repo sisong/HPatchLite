@@ -1,5 +1,5 @@
 # [HPatchLite](https://github.com/sisong/HPatchLite)
-[![release](https://img.shields.io/badge/release-v0.4.0-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
+[![release](https://img.shields.io/badge/release-v0.4.1-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/HPatchLite/blob/main/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/HPatchLite/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/HPatchLite?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/HPatchLite/issues)   
