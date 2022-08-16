@@ -61,10 +61,12 @@
 			<Add option="-fexceptions" />
 			<Add option="-D_LARGEFILE_SOURCE" />
 			<Add option="-D_FILE_OFFSET_BITS=64" />
+			<Add option="-D_IS_USED_SHARE_hpatch_lite_types=1" />
 			<Add directory="../../tinyuz/decompress" />
 			<Add directory="../../tinyuz/compress" />
 			<Add directory="../../lzma/C" />
 			<Add directory="../../zlib" />
+			<Add directory="../../HDiffPatch/libHDiffPatch/HPatchLite" />
 		</Compiler>
 		<Linker>
 			<Add library="pthread" />
