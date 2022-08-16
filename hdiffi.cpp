@@ -71,7 +71,6 @@ static void printUsage(){
 #endif
            "  -c-compressType[-compressLevel]\n"
            "      set outDiffFile Compress type, DEFAULT uncompress;\n"
-           "      for resave diffFile,recompress diffFile to outDiffFile by new set;\n"
            "      support compress type & level & dict:\n"
 #ifdef _CompressPlugin_tuz
            "        -c-tuz[-dictSize]               (or -tinyuz)\n"

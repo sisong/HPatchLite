@@ -8,20 +8,32 @@
 
  english | [中文版](README_cn.md)   
 
-HPatchLite is a lite version of [HDiffPatch](https://github.com/sisong/HDiffPatch), tiny code & ram requirements when hpatch on MCU,NB-IoT,...   
-The patch code(disk or Flash occupancy) compiled by Mbed Studio is 664 bytes.    
-And the patch memory(RAM occupancy) can also be very small, RAM size = one decompress memory size + input cache size(>=3Byte) when patch. Tip: The smaller input cache only affects the patch speed.   
+HPatchLite is a lite version of [HDiffPatch](https://github.com/sisong/HDiffPatch), tiny code & ram requirements when patch on MCU,NB-IoT,...   
+The patch code(ROM occupancy) very small, compiled by Mbed Studio is 664 bytes (define _IS_RUN_MEM_SAFE_CHECK=0 can reduce 74 bytes). 
+Tip: if used tinyuz & define _IS_USED_SHARE_hpatch_lite_types=1, can reduce 52 bytes.   
+At the same time, the patch memory(RAM occupancy) can also be very small, RAM size = one decompress memory size + input cache size(>=3Byte) when patch. 
+Tip: The smaller input cache only affects the patch speed.   
 
-(developmenting & evaluating ...)
+---
+## Releases/Binaries
+[Download from latest release](https://github.com/sisong/HPatchLite/releases) : Command line app for Windows, Linux, MacOS.     
+( release files build by projects in path `HPatchLite/builds` )   
 
 ## Build it yourself
-need submodule libraries [HDiffPatch](https://github.com/sisong/HDiffPatch) and [tinyuz](https://github.com/sisong/tinyuz)
+### Linux or MacOS X ###
 ```
 $ cd <dir>
 $ git clone --recursive https://github.com/sisong/HPatchLite.git
 $ cd HPatchLite
 $ make
 ```
+
+### Windows ###
+```
+$ cd <dir>
+$ git clone --recursive https://github.com/sisong/HPatchLite.git
+```
+build `HPatchLite/builds/vc/HPatchLite.sln` with [`Visual Studio`](https://visualstudio.microsoft.com)   
 
 ---
 ## **diff** command line usage:  
@@ -44,10 +56,21 @@ special options:
       DEFAULT -p-4; requires more memory!
   -c-compressType[-compressLevel]
       set outDiffFile Compress type, DEFAULT uncompress;
-      for resave diffFile,recompress diffFile to outDiffFile by new set;
       support compress type & level & dict:
         -c-tuz[-dictSize]               (or -tinyuz)
             1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m,512m..., DEFAULT 32k
+        -c-zlib[-{1..9}[-dictBits]]     DEFAULT level 9
+            dictBits can 9--15, DEFAULT 15.
+        -c-pzlib[-{1..9}[-dictBits]]    DEFAULT level 6
+            dictBits can 9--15, DEFAULT 15.
+            support run by multi-thread parallel, fast!
+        -c-lzma[-{0..9}[-dictSize]]     DEFAULT level 7
+            dictSize can like 4096 or 4k or 4m or 128m etc..., DEFAULT 32k
+            support run by 2-thread parallel.
+        -c-lzma2[-{0..9}[-dictSize]]    DEFAULT level 7
+            dictSize can like 4096 or 4k or 4m or 128m etc..., DEFAULT 32k
+            support run by multi-thread parallel, fast!
+            WARNING: code not compatible with it compressed by -c-lzma!
   -d  Diff only, do't run patch check, DEFAULT run patch check.
   -t  Test only, run patch check, patch(oldFile,testDiffFile)==newFile ?
   -f  Force overwrite, ignore write path already exists;
@@ -66,7 +89,7 @@ patch usage: hpatchi [options] oldFile diffFile outNewFile
   if oldFile is empty input parameter ""
 options:
   -s[-cacheSize]
-      DEFAULT -s-48k; cacheSize>=3, can like 256,1k, 60k or 1m etc....
+      DEFAULT -s-32k; cacheSize>=3, can like 256,1k, 60k or 1m etc....
       requires (cacheSize + 1*decompress buffer size)+O(1) bytes of memory.
   -f  Force overwrite, ignore write path already exists;
       DEFAULT (no -f) not overwrite and then return error;
