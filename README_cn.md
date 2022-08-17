@@ -9,9 +9,13 @@
  中文版 | [english](README.md)   
 
 HPatchLite 是 [HDiffPatch](https://github.com/sisong/HDiffPatch) 的一个精简(Lite)版，为在MCU、NB-IoT等小型设备上执行打补丁(patch)功能而优化。   
-编译后的patch代码(ROM 占用)非常的小，用 Mbed Studio 编译后为 664 字节(设置宏_IS_RUN_MEM_SAFE_CHECK=0可以节省74字节)。
-提示：如果使用了tinyuz并且设置宏_IS_USED_SHARE_hpatch_lite_types=1，可以节省52字节。   
-同时，patch时内存(RAM 占用)也可以非常的小，大小为 一个解压缩流需要的内存大小 + patch时输入的缓存区大小(>=3Byte)。
+
+编译后的patch代码(ROM 占用)非常的小，用 Mbed Studio 编译后为 664 字节。 
+提示：设置宏_IS_RUN_MEM_SAFE_CHECK=0可以节省74字节； 
+如果使用了tinyuz并且设置宏_IS_USED_SHARE_hpatch_lite_types=1，可以节省52字节。   
+
+同时，patch时内存(RAM 占用)也可以非常的小， 
+大小为 一个解压缩流需要的内存大小 + patch时输入的缓存区大小(>=3Byte)。
 提示：输入缓存区较小时只影响patch速度。    
 
 ---

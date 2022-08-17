@@ -1,5 +1,5 @@
 # args
-MT       := 0
+MT       := 1
 TUZ		 := 1
 # 0: not need zlib;  1: compile zlib source code;  2: used -lz to link zlib lib;
 ZLIB     := 1
@@ -114,7 +114,8 @@ endif
 
 ifeq ($(TUZ),0)
 else
-    DEF_FLAGS += -D_CompressPlugin_tuz -I$(TUZ_PATH)/decompress -I$(TUZ_PATH)/compress
+    DEF_FLAGS += -D_CompressPlugin_tuz -D_IS_USED_SHARE_hpatch_lite_types=1
+	DEF_FLAGS += -I$(TUZ_PATH)/decompress -I$(TUZ_PATH)/compress -I$(HDP_PATH)/libHDiffPatch/HPatchLite
 endif
 ifeq ($(ZLIB),0)
 else
@@ -173,15 +174,15 @@ CXXFLAGS += $(DEF_FLAGS)
 
 .PHONY: all install clean
 
-all: libpatchlite.a hpatchi hdiffi mostlyclean
+all: libhpatchlite.a hpatchi hdiffi mostlyclean
 
-libpatchlite.a: $(HDIFFI_OBJ)
+libhpatchlite.a: $(HDIFFI_OBJ)
 	$(AR) rcs $@ $^
 
 hpatchi: $(HPATCHI_OBJ)
 	$(CC) hpatchi.c $(HPATCHI_OBJ) $(CFLAGS) $(PATCH_LINK) -o hpatchi
-hdiffi: libpatchlite.a 
-	$(CXX) hdiffi.cpp libpatchlite.a $(CXXFLAGS) $(DIFF_LINK) -o hdiffi
+hdiffi: libhpatchlite.a 
+	$(CXX) hdiffi.cpp libhpatchlite.a $(CXXFLAGS) $(DIFF_LINK) -o hdiffi
 
 ifeq ($(OS),Windows_NT) # mingw?
   RM := del /Q /F
@@ -196,7 +197,7 @@ INSTALL_BIN := $(DESTDIR)/usr/local/bin
 mostlyclean: hpatchi hdiffi
 	$(RM) $(DEL_HDIFFI_OBJ)
 clean:
-	$(RM) libpatchlite.a hpatchi hdiffi $(DEL_HDIFFI_OBJ)
+	$(RM) libhpatchlite.a hpatchi hdiffi $(DEL_HDIFFI_OBJ)
 
 install: all
 	$(INSTALL_X) hdiffi $(INSTALL_BIN)/hdiffi

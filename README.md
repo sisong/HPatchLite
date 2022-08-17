@@ -9,9 +9,13 @@
  english | [中文版](README_cn.md)   
 
 HPatchLite is a lite version of [HDiffPatch](https://github.com/sisong/HDiffPatch), tiny code & ram requirements when patch on MCU,NB-IoT,...   
-The patch code(ROM occupancy) very small, compiled by Mbed Studio is 664 bytes (define _IS_RUN_MEM_SAFE_CHECK=0 can reduce 74 bytes). 
-Tip: if used tinyuz & define _IS_USED_SHARE_hpatch_lite_types=1, can reduce 52 bytes.   
-At the same time, the patch memory(RAM occupancy) can also be very small, RAM size = one decompress memory size + input cache size(>=3Byte) when patch. 
+
+The patch code(ROM occupancy) very small, compiled by Mbed Studio is 664 bytes. 
+Tip: if define _IS_RUN_MEM_SAFE_CHECK=0 can reduce 74 bytes; 
+if used tinyuz & define _IS_USED_SHARE_hpatch_lite_types=1, can reduce 52 bytes.   
+
+At the same time, the patch memory(RAM occupancy) can also be very small, 
+RAM size = one decompress memory size + input cache size(>=3Byte) when patch. 
 Tip: The smaller input cache only affects the patch speed.   
 
 ---
