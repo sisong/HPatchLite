@@ -44,6 +44,22 @@ jobs:
           xcodebuild -workspace builds/xcode/HPatchLite.xcworkspace -scheme hpatchi -configuration Release OBJROOT=$PWD/bin SYMROOT=$PWD/bin
           xcodebuild -workspace builds/xcode/HPatchLite.xcworkspace -scheme hdiffi -configuration Release OBJROOT=$PWD/bin SYMROOT=$PWD/bin
 
+  ndk-build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nttld/setup-ndk@v1.0.6
+        with:
+          ndk-version: r16b
+      - name: buildByAndroidNDK
+        run: |
+          git submodule update --init --recursive
+          cd ./builds/android_ndk_jni_mk
+          ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk NDK_APPLICATION_MK=./Application.mk
+
   vc-build:
     runs-on: windows-latest
     steps:

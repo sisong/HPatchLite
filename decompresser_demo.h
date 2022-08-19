@@ -34,9 +34,9 @@
 #   include "zlib.h" // http://zlib.net/  https://github.com/madler/zlib
 #undef Byte
 #define ZLIB_INTERNAL 
-#   include "inftrees.h" //for code 
+#   include "inftrees.h" //for inflate_state::code 
 #undef ZLIB_INTERNAL
-#   include "inflate.h" //for inflate_state 
+#   include "inflate.h" //for inflate_state
 #endif
     typedef struct zlib_TStream{
         hpi_TInputStreamHandle  codeStream;
