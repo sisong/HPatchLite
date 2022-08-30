@@ -408,11 +408,11 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     hpatch_TFileStreamInput_init(&diffData);
     hpatch_TFileStreamOutput_init(&newData);
     {//open
-        printf(    "old : \""); hpatch_printPath_utf8(oldFileName);
+        printf(    "old : \""); if (oldFileName) hpatch_printPath_utf8(oldFileName);
         printf("\"\ndiff: \""); hpatch_printPath_utf8(diffFileName);
         printf("\"\nout : \""); hpatch_printPath_utf8(outNewFileName);
         printf("\"\n");
-        if (0==strcmp(oldFileName,"")){ // isOldFileInputEmpty
+        if ((0==oldFileName)||(0==strlen(oldFileName))){
             oldData.base.read=_read_empty;
         }else{
             check(hpatch_TFileStreamInput_open(&oldData,oldFileName),
