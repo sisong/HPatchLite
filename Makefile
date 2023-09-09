@@ -138,7 +138,6 @@ ifeq ($(MT),0)
     -D_IS_USED_MULTITHREAD=0
 else
   DEF_FLAGS += \
-    -DZSTD_MULTITHREAD=1 \
     -D_IS_USED_MULTITHREAD=1 \
     -D_IS_USED_PTHREAD=1
 endif
