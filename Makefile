@@ -1,19 +1,19 @@
 # args
 MT       := 1
-TUZ		 := 1
+TUZ		   := 1
 # 0: not need zlib;  1: compile zlib source code;  2: used -lz to link zlib lib;
 ZLIB     := 1
 LZMA     := 1
 ARM64ASM := 0
 STATIC_CPP := 0
 # used clang?
-CL  	 := 0
+CL  	   := 0
 # build with -m32?
 M32      := 0
 # build for out min size
 MINS     := 0
 ifeq ($(OS),Windows_NT) # mingw?
-  CC    := gcc
+  CC     := gcc
 endif
 
 HDP_PATH := HDiffPatch
@@ -45,8 +45,9 @@ else # https://www.7-zip.org  https://github.com/sisong/lzma
   HDIFFI_OBJ += $(LZMA_PATH)/LzFind.o \
   				$(LZMA_PATH)/LzFindOpt.o \
   				$(LZMA_PATH)/CpuArch.o \
+				  $(LZMA_PATH)/7zStream.o \
   				$(LZMA_PATH)/LzmaEnc.o \
-				$(LZMA_PATH)/Lzma2Enc.o  
+				  $(LZMA_PATH)/Lzma2Enc.o  
   ifeq ($(MT),0)  
   else  
     HDIFFI_OBJ+=$(LZMA_PATH)/LzFindMt.o \
@@ -127,13 +128,13 @@ else
   DEF_FLAGS += -D_CompressPlugin_lzma -D_CompressPlugin_lzma2 -I$(LZMA_PATH)
   ifeq ($(ARM64ASM),0)
   else
-    DEF_FLAGS += -D_LZMA_DEC_OPT
+    DEF_FLAGS += -DZ7_LZMA_DEC_OPT
   endif
 endif
 
 ifeq ($(MT),0)
   DEF_FLAGS += \
-    -D_7ZIP_ST \
+    -DZ7_ST \
     -D_IS_USED_MULTITHREAD=0
 else
   DEF_FLAGS += \

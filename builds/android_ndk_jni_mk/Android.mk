@@ -42,9 +42,9 @@ Src_Files := $(LOCAL_PATH)/hpatchi_jni.c \
 DEF_FLAGS := -Os -D_IS_NEED_DEFAULT_CompressPlugin=0
 ifeq ($(LZMA),0)
 else
-  DEF_FLAGS += -D_CompressPlugin_lzma -D_CompressPlugin_lzma2 -D_7ZIP_ST -I$(LZMA_PATH)
+  DEF_FLAGS += -D_CompressPlugin_lzma -D_CompressPlugin_lzma2 -DZ7_ST -I$(LZMA_PATH)
   ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
-    DEF_FLAGS += -D_LZMA_DEC_OPT
+    DEF_FLAGS += -DZ7_LZMA_DEC_OPT
   endif
 endif
 ifeq ($(TUZ),0)
