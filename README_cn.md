@@ -1,5 +1,5 @@
 # [HPatchLite](https://github.com/sisong/HPatchLite)
-[![release](https://img.shields.io/badge/release-v0.4.2-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
+[![release](https://img.shields.io/badge/release-v0.4.3-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/HPatchLite/blob/main/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/HPatchLite/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/HPatchLite?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/HPatchLite/issues)   
@@ -10,13 +10,13 @@
 
 HPatchLite 是 [HDiffPatch](https://github.com/sisong/HDiffPatch) 的一个精简(Lite)版，为在超小型嵌入式设备(MCU、NB-IoT等)上执行打补丁(patch)功能而优化。   
 
-编译后的patch代码(ROM或flash占用)非常的小，用 Mbed Studio 编译后为 662 字节。 
-提示：如果使用了 [tinyuz](https://github.com/sisong/tinyuz) 并且设置宏_IS_USED_SHARE_hpatch_lite_types=1，可以节省52字节； 
-设置宏_IS_RUN_MEM_SAFE_CHECK=0，非安全模式可以节省80字节。   
-
+编译后的patch代码(ROM或flash占用)非常的小，用 Mbed Studio 编译后为 662 字节。   
+提示：*设置宏_IS_RUN_MEM_SAFE_CHECK=0，非安全模式可以节省80字节; 
+如果使用了 [tinyuz](https://github.com/sisong/tinyuz) 并且设置宏_IS_USED_SHARE_hpatch_lite_types=1，可以节省52字节。*    
+   
 同时，patch时内存(RAM 占用)也可以非常的小， 
-大小为 一个解压缩流需要的内存大小 + patch时输入的缓存区大小(>=3Byte)。
-提示：输入缓存区较小时只影响patch速度。    
+大小为 一个解压缩流需要的内存大小 + patch时输入的缓存区大小(>=3字节)。
+提示：*输入缓存区较小时只影响patch速度。*    
 
 ---
 ## 二进制发布包
@@ -57,7 +57,7 @@ $ git clone --recursive https://github.com/sisong/HPatchLite.git
   -p-parallelThreadNumber
       设置线程数parallelThreadNumber>1时,开启多线程并行模式;
       默认为-p-4;需要占用较多的内存。
--c-compressType[-compressLevel]
+  -c-compressType[-compressLevel]
       设置补丁数据使用的压缩算法和压缩级别等, 默认不压缩;
       支持的压缩算法、压缩级别和字典大小等:
         -c-tuz[-dictSize]               (或者 -tinyuz)
@@ -95,7 +95,7 @@ options:
   -s[-cacheSize]
       默认设置为-s-32k; 缓冲区cacheSize>=3;
       可以设置为256,1k,60k,1m等
-      需要的内存大小: (cacheSize + 1*解压缩缓冲区)+O(1)
+      打补丁需要的总内存大小: (cacheSize + 1*解压缩缓冲区)+O(1)
   -f  强制文件写覆盖, 忽略输出的路径是否已经存在;
       默认不执行覆盖, 如果输出路径已经存在, 直接返回错误;
       如果设置了-f,但路径已经存在并且是一个文件夹, 那么会始终返回错误。

@@ -79,12 +79,8 @@
 		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/diff.cpp" />
 		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/private_diff/bytes_rle.cpp" />
 		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/private_diff/compress_detect.cpp" />
-		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort64.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.cpp" />
+		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort64.cpp" />
 		<Unit filename="../../HDiffPatch/libHDiffPatch/HDiff/private_diff/limit_mem_diff/adler_roll.c">
 			<Option compilerVar="CC" />
 		</Unit>

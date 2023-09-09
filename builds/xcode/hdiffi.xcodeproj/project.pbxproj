@@ -18,8 +18,8 @@
 		0DB0B05228322742007DC717 /* file_for_patch.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B05128322742007DC717 /* file_for_patch.c */; };
 		0DB0B0822832276B007DC717 /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B0562832276B007DC717 /* patch.c */; };
 		0DB0B0832832276B007DC717 /* hpatch_lite.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B05B2832276B007DC717 /* hpatch_lite.c */; };
-		0DB0B0842832276B007DC717 /* divsufsort.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B06B2832276B007DC717 /* divsufsort.c */; };
-		0DB0B0852832276B007DC717 /* divsufsort64.c in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B06F2832276B007DC717 /* divsufsort64.c */; };
+		0DB0B0842832276B007DC717 /* divsufsort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B06B2832276B007DC717 /* divsufsort.cpp */; };
+		0DB0B0852832276B007DC717 /* divsufsort64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B06F2832276B007DC717 /* divsufsort64.cpp */; };
 		0DB0B0862832276B007DC717 /* compress_detect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B0702832276B007DC717 /* compress_detect.cpp */; };
 		0DB0B0872832276B007DC717 /* bytes_rle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B0712832276B007DC717 /* bytes_rle.cpp */; };
 		0DB0B0882832276B007DC717 /* suffix_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B0722832276B007DC717 /* suffix_string.cpp */; };
@@ -73,15 +73,10 @@
 		0DB0B0622832276B007DC717 /* diff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = diff.h; sourceTree = "<group>"; };
 		0DB0B0642832276B007DC717 /* suffix_string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = suffix_string.h; sourceTree = "<group>"; };
 		0DB0B0662832276B007DC717 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
-		0DB0B0672832276B007DC717 /* sssort.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sssort.c.inc.h; sourceTree = "<group>"; };
 		0DB0B0682832276B007DC717 /* divsufsort64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort64.h; sourceTree = "<group>"; };
-		0DB0B0692832276B007DC717 /* divsufsort.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort.c.inc.h; sourceTree = "<group>"; };
-		0DB0B06A2832276B007DC717 /* utils.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.c.inc.h; sourceTree = "<group>"; };
-		0DB0B06B2832276B007DC717 /* divsufsort.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = divsufsort.c; sourceTree = "<group>"; };
-		0DB0B06C2832276B007DC717 /* divsufsort_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort_private.h; sourceTree = "<group>"; };
+		0DB0B06B2832276B007DC717 /* divsufsort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = divsufsort.cpp; sourceTree = "<group>"; };
 		0DB0B06D2832276B007DC717 /* divsufsort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort.h; sourceTree = "<group>"; };
-		0DB0B06E2832276B007DC717 /* trsort.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trsort.c.inc.h; sourceTree = "<group>"; };
-		0DB0B06F2832276B007DC717 /* divsufsort64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = divsufsort64.c; sourceTree = "<group>"; };
+		0DB0B06F2832276B007DC717 /* divsufsort64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = divsufsort64.cpp; sourceTree = "<group>"; };
 		0DB0B0702832276B007DC717 /* compress_detect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = compress_detect.cpp; sourceTree = "<group>"; };
 		0DB0B0712832276B007DC717 /* bytes_rle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bytes_rle.cpp; sourceTree = "<group>"; };
 		0DB0B0722832276B007DC717 /* suffix_string.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffix_string.cpp; sourceTree = "<group>"; };
@@ -228,15 +223,10 @@
 			isa = PBXGroup;
 			children = (
 				0DB0B0662832276B007DC717 /* config.h */,
-				0DB0B0672832276B007DC717 /* sssort.c.inc.h */,
 				0DB0B0682832276B007DC717 /* divsufsort64.h */,
-				0DB0B0692832276B007DC717 /* divsufsort.c.inc.h */,
-				0DB0B06A2832276B007DC717 /* utils.c.inc.h */,
-				0DB0B06B2832276B007DC717 /* divsufsort.c */,
-				0DB0B06C2832276B007DC717 /* divsufsort_private.h */,
+				0DB0B06B2832276B007DC717 /* divsufsort.cpp */,
 				0DB0B06D2832276B007DC717 /* divsufsort.h */,
-				0DB0B06E2832276B007DC717 /* trsort.c.inc.h */,
-				0DB0B06F2832276B007DC717 /* divsufsort64.c */,
+				0DB0B06F2832276B007DC717 /* divsufsort64.cpp */,
 			);
 			path = libdivsufsort;
 			sourceTree = "<group>";
@@ -338,7 +328,7 @@
 				0DB0B0872832276B007DC717 /* bytes_rle.cpp in Sources */,
 				0DB0B04C2832271E007DC717 /* tuz_enc_code.cpp in Sources */,
 				0DB0B0A128322BA1007DC717 /* parallel_import.cpp in Sources */,
-				0DB0B0852832276B007DC717 /* divsufsort64.c in Sources */,
+				0DB0B0852832276B007DC717 /* divsufsort64.cpp in Sources */,
 				0DB0B04E2832271E007DC717 /* tuz_enc_clip.cpp in Sources */,
 				0DB0B04728322706007DC717 /* tuz_enc.cpp in Sources */,
 				0DB0B0A028322BA1007DC717 /* parallel_channel.cpp in Sources */,
@@ -355,7 +345,7 @@
 				0DB0B0822832276B007DC717 /* patch.c in Sources */,
 				0DB0B0882832276B007DC717 /* suffix_string.cpp in Sources */,
 				0DB0B09F28322BA1007DC717 /* compress_parallel.cpp in Sources */,
-				0DB0B0842832276B007DC717 /* divsufsort.c in Sources */,
+				0DB0B0842832276B007DC717 /* divsufsort.cpp in Sources */,
 				0DB0B045283226F4007DC717 /* tuz_dec.c in Sources */,
 				0DB0B08D2832276B007DC717 /* diff.cpp in Sources */,
 			);

@@ -5,13 +5,20 @@
  The MIT License (MIT)
  Copyright (c) 2020-2022 HouSisong All Rights Reserved.
  */
-
 #include <string.h>
-#include <stdio.h>  //fprintf
 #include "hdiffi_import_patch.h"
 #include "HDiffPatch/_clock_for_demo.h"
 #include "HDiffPatch/_atosize.h"
 #include "HDiffPatch/file_for_patch.h"
+
+#ifndef _IS_NEED_PRINT_LOG
+#   define _IS_NEED_PRINT_LOG   1
+#endif
+#if (_IS_NEED_PRINT_LOG)
+#include <stdio.h>  //fprintf
+#else
+#define printf(...)             1
+#endif
 
 #ifndef _IS_NEED_MAIN
 #   define  _IS_NEED_MAIN 1

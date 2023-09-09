@@ -7,4 +7,6 @@
 #endif
 #define _IS_NEED_MAIN                   0
 #define _IS_NEED_ALL_CompressPlugin     0
+#define _IS_NEED_PRINT_LOG              0
+
 #include "../../hpatchi.c"

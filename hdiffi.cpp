@@ -74,7 +74,11 @@ static void printUsage(){
            "      support compress type & level & dict:\n"
 #ifdef _CompressPlugin_tuz
            "        -c-tuz[-dictSize]               (or -tinyuz)\n"
+           "        -c-tuzi[-dictSize]              (or -tinyuzi)\n"
            "            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m,512m..., DEFAULT 32k\n"
+           "            Note: -c-tuz is default compressor;\n"
+           "            But if your compile tinyuz deccompressor source code, set tuz_isNeedLiteralLine=0,\n"
+           "            then must used -c-tuzi compressor.\n"
 #endif
 #ifdef _CompressPlugin_zlib
            "        -c-zlib[-{1..9}[-dictBits]]     DEFAULT level 9\n"
@@ -285,6 +289,15 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
                                         &dictSize,1,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuz-?"){
         static TCompressPlugin_tuz _tuzCompressPlugin=tuzCompressPlugin;
         _tuzCompressPlugin.props.dictSize=(tuz_size_t)dictSize;
+        _tuzCompressPlugin.props.isNeedLiteralLine=true;
+        out_compressPlugin->compress=&_tuzCompressPlugin.base;
+        out_compressPlugin->compress_type=hpi_compressType_tuz; }}
+    __getCompressSet(_tryGetCompressSet(&isMatchedType,
+                                        ptype,ptypeEnd,"tuzi","tinyuzi",
+                                        &dictSize,1,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuzi-?"){
+        static TCompressPlugin_tuz _tuzCompressPlugin=tuzCompressPlugin;
+        _tuzCompressPlugin.props.dictSize=(tuz_size_t)dictSize;
+        _tuzCompressPlugin.props.isNeedLiteralLine=false;
         out_compressPlugin->compress=&_tuzCompressPlugin.base;
         out_compressPlugin->compress_type=hpi_compressType_tuz; }}
 #endif

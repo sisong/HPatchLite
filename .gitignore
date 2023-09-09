@@ -18,3 +18,5 @@ Release_x86
 *.opensdf
 *.sdf
 *.ipch
+builds/android_ndk_jni_mk/libs/
+builds/android_ndk_jni_mk/obj/

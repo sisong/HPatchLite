@@ -1,5 +1,5 @@
 # [HPatchLite](https://github.com/sisong/HPatchLite)
-[![release](https://img.shields.io/badge/release-v0.4.2-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
+[![release](https://img.shields.io/badge/release-v0.4.3-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/HPatchLite/blob/main/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/HPatchLite/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/HPatchLite?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/HPatchLite/issues)   
@@ -10,13 +10,13 @@
 
 HPatchLite is a lite version of [HDiffPatch](https://github.com/sisong/HDiffPatch), tiny code & ram requirements when patch on embedded systems,MCU,NB-IoT,...   
 
-The patch code(ROM or flash occupancy) very small, compiled by Mbed Studio is 662 bytes. 
-Tip: if used [tinyuz](https://github.com/sisong/tinyuz) & define _IS_USED_SHARE_hpatch_lite_types=1, can reduce 52 bytes; 
-if define _IS_RUN_MEM_SAFE_CHECK=0, unsafe mode can reduce 80 bytes.   
-
+The patch code(ROM or flash occupancy) very small, compiled by Mbed Studio is 662 bytes.    
+Tip: *if define _IS_RUN_MEM_SAFE_CHECK=0, unsafe mode can reduce 80 bytes; 
+if used [tinyuz](https://github.com/sisong/tinyuz) & define _IS_USED_SHARE_hpatch_lite_types=1, can reduce 52 bytes.*   
+   
 At the same time, the patch memory(RAM occupancy) can also be very small, 
-RAM size = one decompress memory size + input cache size(>=3Byte) when patch. 
-Tip: The smaller input cache only affects the patch speed.   
+RAM size = one decompress memory size + input cache size(>=3Byte) when patch.    
+Tip: *The smaller input cache only affects the patch speed.*   
 
 ---
 ## Releases/Binaries
