@@ -156,6 +156,9 @@
     <ClCompile Include="..\..\HDiffPatch\libParallel\parallel_channel.cpp" />
     <ClCompile Include="..\..\HDiffPatch\libParallel\parallel_import.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\HDiffPatch\libHDiffPatch\HDiff\diff_for_hpatch_lite.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

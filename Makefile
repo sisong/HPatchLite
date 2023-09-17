@@ -139,7 +139,7 @@ ifeq ($(MT),0)
 else
   DEF_FLAGS += \
     -D_IS_USED_MULTITHREAD=1 \
-    -D_IS_USED_PTHREAD=1
+    -D_IS_USED_CPP11THREAD=1
 endif
 
 PATCH_LINK := 

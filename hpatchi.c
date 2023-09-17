@@ -285,7 +285,7 @@ static hpi_BOOL _do_writeNew(struct hpatchi_listener_t* listener,const hpi_byte*
     printf("hpatchi run with decompresser: \"" decName "\"\n"); \
     check(reservedMemSize>0,HPATCHI_DECOMPRESSER_DICT_ERROR,"_" decName "_TStream_getReservedMemSize()");   \
     decompressMemSize=reservedMemSize+decBufSize;               \
-    printf("  requirements memory size: (must) %" PRIu64 " + (cache) %" PRIu64 "\n",            \
+    printf("  requirements memory size: (must) %" PRIu64 " + (custom cache) %" PRIu64 "\n",     \
            (hpatch_StreamPos_t)reservedMemSize,(hpatch_StreamPos_t)(decBufSize+patchBufSize));  \
     pmem=(hpi_byte*)malloc(decompressMemSize+patchBufSize);     \
     check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");         \
@@ -306,8 +306,8 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
     hpi_byte*       pmem=0;
     hpi_byte*       temp_cache;
     // patchCacheSize 1/4 for decompress input buf, 3/4 for patch buf
-    const size_t    decBufSize=(patchCacheSize>=4)?(patchCacheSize>>2):1;
-    size_t          patchBufSize=(patchCacheSize-decBufSize)>>1<<1;
+    size_t          patchBufSize=(size_t)( ((hpatch_uint64_t)patchCacheSize+1)*3/4>>1<<1 );
+    const size_t    decBufSize=patchCacheSize-patchBufSize;
 #ifdef _CompressPlugin_tuz
     tuz_TStream     tuzStream;
 #endif
@@ -320,16 +320,16 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
 #ifdef _CompressPlugin_lzma2
     lzma2_TStream   lzma2Stream;
 #endif
-
+    assert(patchCacheSize>=3);
     assert(patchCacheSize==(hpi_size_t)patchCacheSize);
     {//get decompresser
         switch (compress_type){
         case hpi_compressType_no: { // memory size: patchCacheSize
             printf("hpatchi run with decompresser: \"\"\n");
             patchBufSize=patchCacheSize;
-            printf("  requirements memory size: (must) %" PRIu64 " + (cache) %" PRIu64 "\n",
-                   (hpatch_StreamPos_t)0,(hpatch_StreamPos_t)(decBufSize+patchBufSize));
-            pmem=(hpi_byte*)malloc(patchCacheSize);
+            printf("  requirements memory size: (must) %" PRIu64 " + (custom cache) %" PRIu64 "\n",
+                   (hpatch_StreamPos_t)0,(hpatch_StreamPos_t)(patchBufSize));
+            pmem=(hpi_byte*)malloc(patchBufSize);
             check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");
             temp_cache=pmem;
         } break;
@@ -343,7 +343,7 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
             check(reservedMemSize>0,HPATCHI_DECOMPRESSER_DICT_ERROR,"tuz_TStream_read_dict_size() dict size");
 
             decompressMemSize=reservedMemSize+decBufSize;
-            printf("  requirements memory size: (must) %" PRIu64 " + (cache) %" PRIu64 "\n",
+            printf("  requirements memory size: (must) %" PRIu64 " + (custom cache) %" PRIu64 "\n",
                    (hpatch_StreamPos_t)reservedMemSize,(hpatch_StreamPos_t)(decBufSize+patchBufSize));
             pmem=(hpi_byte*)malloc(decompressMemSize+patchBufSize);
             check(pmem,HPATCHI_MEM_ERROR,"alloc cache memory");

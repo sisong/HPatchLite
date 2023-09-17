@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "HDiffPatch/libParallel/parallel_import.h"
 #include "HDiffPatch/libHDiffPatch/HDiff/diff_for_hpatch_lite.h"
 #include "HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.h"
 #include "HDiffPatch/_clock_for_demo.h"
@@ -54,12 +55,11 @@ static void printUsage(){
     printf("diff    usage: hdiffi [options] oldFile newFile outDiffFile\n"
            "test    usage: hdiffi    -t     oldFile newFile testDiffFile\n"
            "  oldFile can empty, and input parameter \"\"\n"
-           "memory options:\n"
+           "options:\n"
            "  -m[-matchScore]\n"
            "      requires (newFileSize+ oldFileSize*5(or *9 when oldFileSize>=2GB))+O(1)\n"
            "        bytes of memory;\n"
            "      matchScore>=0, DEFAULT -m-6\n"
-           "special options:\n"
            "  -cache \n"
            "      set is use a big cache for slow match, DEFAULT false;\n"
            "      if newData not similar to oldData then diff speed++,\n"
@@ -126,7 +126,6 @@ typedef enum THDiffiResult {
     HDIFFI_MEM_ERROR, // 5
     HDIFFI_DIFF_ERROR,
     HDIFFI_PATCH_ERROR,
-
     HDIFFI_PATHTYPE_ERROR,
 } THDiffiResult;
 
@@ -138,6 +137,7 @@ struct TDiffiSets{
     size_t   matchScore;
     hpi_BOOL isDoDiff;
     hpi_BOOL isDoPatchCheck;
+    size_t   threadNum;
 };
 
 int hdiffi(const char* oldFileName,const char* newFileName,const char* outDiffFileName,
@@ -286,7 +286,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
 #ifdef _CompressPlugin_tuz
     __getCompressSet(_tryGetCompressSet(&isMatchedType,
                                         ptype,ptypeEnd,"tuz","tinyuz",
-                                        &dictSize,1,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuz-?"){
+                                        &dictSize,tuz_kMinOfDictSize,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuz-?"){
         static TCompressPlugin_tuz _tuzCompressPlugin=tuzCompressPlugin;
         _tuzCompressPlugin.props.dictSize=(tuz_size_t)dictSize;
         _tuzCompressPlugin.props.isNeedLiteralLine=true;
@@ -294,7 +294,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
         out_compressPlugin->compress_type=hpi_compressType_tuz; }}
     __getCompressSet(_tryGetCompressSet(&isMatchedType,
                                         ptype,ptypeEnd,"tuzi","tinyuzi",
-                                        &dictSize,1,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuzi-?"){
+                                        &dictSize,tuz_kMinOfDictSize,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuzi-?"){
         static TCompressPlugin_tuz _tuzCompressPlugin=tuzCompressPlugin;
         _tuzCompressPlugin.props.dictSize=(tuz_size_t)dictSize;
         _tuzCompressPlugin.props.isNeedLiteralLine=false;
@@ -324,11 +324,11 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
     diffSets.isDoDiff =_kNULL_VALUE;
     diffSets.isDoPatchCheck=_kNULL_VALUE;
     diffSets.isUseBigCacheMatch =_kNULL_VALUE;
+    diffSets.threadNum = _THREAD_NUMBER_NULL;
     hpi_BOOL isForceOverwrite=_kNULL_VALUE;
     hpi_BOOL isOutputHelp=_kNULL_VALUE;
     hpi_BOOL isOutputVersion=_kNULL_VALUE;
     hpi_BOOL isOldFileInputEmpty=_kNULL_VALUE;
-    size_t      threadNum = _THREAD_NUMBER_NULL;
     hdiffi_TCompress      compressPlugin={0,hpi_compressType_no};
     std::vector<const char *> arg_values;
     if (argc<=1){
@@ -389,10 +389,10 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
             } break;
 #if (_IS_USED_MULTITHREAD)
             case 'p':{
-                _options_check((threadNum==_THREAD_NUMBER_NULL)&&(op[2]=='-'),"-p-?");
+                _options_check((diffSets.threadNum==_THREAD_NUMBER_NULL)&&(op[2]=='-'),"-p-?");
                 const char* pnum=op+3;
-                _options_check(a_to_size(pnum,strlen(pnum),&threadNum),"-p-?");
-                _options_check(threadNum>=_THREAD_NUMBER_MIN,"-p-?");
+                _options_check(a_to_size(pnum,strlen(pnum),&diffSets.threadNum),"-p-?");
+                _options_check(diffSets.threadNum>=_THREAD_NUMBER_MIN,"-p-?");
             } break;
 #endif
             case 'c':{
@@ -431,13 +431,13 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
         if (arg_values.empty())
             return 0; //ok
     }
-    if (threadNum==_THREAD_NUMBER_NULL)
-        threadNum=_THREAD_NUMBER_DEFUALT;
-    else if (threadNum>_THREAD_NUMBER_MAX)
-        threadNum=_THREAD_NUMBER_MAX;
+    if (diffSets.threadNum==_THREAD_NUMBER_NULL)
+        diffSets.threadNum=_THREAD_NUMBER_DEFUALT;
+    else if (diffSets.threadNum>_THREAD_NUMBER_MAX)
+        diffSets.threadNum=_THREAD_NUMBER_MAX;
     if (compressPlugin.compress!=0){
         hdiff_TCompress* compress=(hdiff_TCompress*)compressPlugin.compress;
-        compress->setParallelThreadNumber(compress,(int)threadNum);
+        compress->setParallelThreadNumber(compress,(int)diffSets.threadNum);
     }
     
     if (isOldFileInputEmpty==_kNULL_VALUE)
@@ -533,8 +533,9 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
     if (diffSets.isDoDiff){
         std::vector<hpi_byte> outDiffData;
         try {
-            create_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
-                             outDiffData,compressPlugin,(int)diffSets.matchScore,diffSets.isUseBigCacheMatch?true:false);
+                create_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
+                                 outDiffData,compressPlugin,(int)diffSets.matchScore,
+                                 diffSets.isUseBigCacheMatch?true:false,0,diffSets.threadNum);
         }catch(const std::exception& e){
             check(false,HDIFFI_DIFF_ERROR,"diff run error: "+e.what());
         }
