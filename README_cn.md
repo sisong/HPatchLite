@@ -10,7 +10,7 @@
 HPatchLite 是 [HDiffPatch](https://github.com/sisong/HDiffPatch) 的一个精简(Lite)版，为在超小型嵌入式设备(MCU、NB-IoT等)上执行打补丁(patch)功能而优化。   
 
 编译后的patch代码(ROM或flash占用)非常的小，用 Mbed Studio 编译后为 662 字节。   
-提示：*设置宏_IS_RUN_MEM_SAFE_CHECK=0，非安全模式可以节省80字节; 
+提示：*设置宏_IS_RUN_MEM_SAFE_CHECK=0，非安全模式可以节省48字节; 
 如果使用了 [tinyuz](https://github.com/sisong/tinyuz) 并且设置宏_IS_USED_SHARE_hpatch_lite_types=1，可以节省52字节。*    
    
 同时，patch时内存(RAM 占用)也可以非常的小， 
@@ -116,6 +116,11 @@ hpi_BOOL hpatch_lite_open(hpi_TInputStreamHandle diff_data,hpi_TInputStream_read
 hpi_BOOL hpatch_lite_patch(hpatchi_listener_t* listener,hpi_pos_t newSize,
                            hpi_byte* temp_cache,hpi_size_t temp_cache_size);
 ```
+
+---
+## 移植补丁算法到嵌入式设备:
+* 将 `HDiffPatch/libHDiffPatch/HPatchLite/` 整个目录添加或拷贝到你的项目工程中；
+* 在需要使用补丁算法的地方添加 `hpatch_lite.h` 头文件的引用，并调用该文件中声明的补丁函数。
 
 ---
 ## 联系

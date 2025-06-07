@@ -10,7 +10,7 @@
 HPatchLite is a lite version of [HDiffPatch](https://github.com/sisong/HDiffPatch), tiny code & ram requirements when patch on embedded systems,MCU,NB-IoT,...   
 
 The patch code(ROM or flash occupancy) very small, compiled by Mbed Studio is 662 bytes.    
-Tip: *if define _IS_RUN_MEM_SAFE_CHECK=0, unsafe mode can reduce 80 bytes; 
+Tip: *if define _IS_RUN_MEM_SAFE_CHECK=0, unsafe mode can reduce 48 bytes; 
 if used [tinyuz](https://github.com/sisong/tinyuz) & define _IS_USED_SHARE_hpatch_lite_types=1, can reduce 52 bytes.*   
    
 At the same time, the patch memory(RAM occupancy) can also be very small, 
@@ -115,6 +115,11 @@ hpi_BOOL hpatch_lite_open(hpi_TInputStreamHandle diff_data,hpi_TInputStream_read
 hpi_BOOL hpatch_lite_patch(hpatchi_listener_t* listener,hpi_pos_t newSize,
                            hpi_byte* temp_cache,hpi_size_t temp_cache_size);
 ```
+
+---
+## Porting patch algorithm to embedded devices:
+* Add or copy the entire directory `HDiffPatch/libHDiffPatch/HPatchLite/` to your project;
+* Add a reference to the `hpatch_lite.h` header file where the patch algorithm is needed, and call the patch functions declared in this file.
 
 ---
 ## Contact
