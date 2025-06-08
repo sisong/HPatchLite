@@ -60,7 +60,14 @@ static void printUsage(){
            "      requires (newFileSize+ oldFileSize*5(or *9 when oldFileSize>=2GB))+O(1)\n"
            "        bytes of memory;\n"
            "      matchScore>=0, DEFAULT -m-6\n"
-           "  -cache \n"
+           "  -inplace[-extraSafeSize]\n"
+           "      open inplace mode, DEFAULT closed;\n"
+           "      extraSafeSize: extra safe access distances for inplace-patch;\n"
+           "      extraSafeSize>=0, recommended & DEFAULT 0;\n"
+           "      if extraSafeSize>0, need use extra space to cache new data when patch,\n"
+           "        thus increasing the chance of matchmaking when diff, also increases \n"
+           "        the complexity of patch code.\n"
+           "  -cache\n"
            "      set is use a big cache for slow match, DEFAULT false;\n"
            "      if newData not similar to oldData then diff speed++,\n"
            "      big cache max used O(oldFileSize) memory, and build slow(diff speed--)\n" 
@@ -132,12 +139,14 @@ typedef enum THDiffiResult {
 int hdiffi_cmd_line(int argc,const char * argv[]);
 
 struct TDiffiSets{
+    hpi_BOOL isDiffForInplacePatch;
     hpi_BOOL isDiffInMem;
     hpi_BOOL isUseBigCacheMatch;
     size_t   matchScore;
     hpi_BOOL isDoDiff;
     hpi_BOOL isDoPatchCheck;
     size_t   threadNum;
+    TInplaceSets inplaceSets;
 };
 
 int hdiffi(const char* oldFileName,const char* newFileName,const char* outDiffFileName,
@@ -320,6 +329,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
 int hdiffi_cmd_line(int argc, const char * argv[]){
     TDiffiSets diffSets;
     memset(&diffSets,0,sizeof(diffSets));
+    diffSets.isDiffForInplacePatch=_kNULL_VALUE;
     diffSets.isDiffInMem=_kNULL_VALUE;
     diffSets.isDoDiff =_kNULL_VALUE;
     diffSets.isDoPatchCheck=_kNULL_VALUE;
@@ -411,6 +421,18 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
                     _options_check(false,"-c?");
                 }
             } break;
+            case 'i':{
+                _options_check((diffSets.isDiffForInplacePatch==_kNULL_VALUE)
+                               &&(op[2]=='n')&&(op[3]=='p')&&(op[4]=='l')&&(op[5]=='a')&&(op[6]=='c')&&(op[7]=='e')
+                               &&((op[8]=='\0')||(op[8]=='-')),"-inplace");
+                diffSets.isDiffForInplacePatch=hpi_TRUE;
+                memset(&diffSets.inplaceSets,0,sizeof(diffSets.inplaceSets));
+                diffSets.inplaceSets.isCanExtendCover=true;
+                if (op[8]=='-'){
+                    const char* pnum=op+9;
+                    _options_check(kmg_to_size(pnum,strlen(pnum),&diffSets.inplaceSets.extraSafeSize),"-extraSafeSize?");
+                }
+            } break;
             default: {
                 _options_check(hpi_FALSE,"-?");
             } break;
@@ -431,6 +453,8 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
         if (arg_values.empty())
             return 0; //ok
     }
+    if (diffSets.isDiffForInplacePatch==_kNULL_VALUE)
+        diffSets.isDiffForInplacePatch=hpi_FALSE;
     if (diffSets.threadNum==_THREAD_NUMBER_NULL)
         diffSets.threadNum=_THREAD_NUMBER_DEFUALT;
     else if (diffSets.threadNum>_THREAD_NUMBER_MAX)
@@ -531,11 +555,30 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
     printf("oldDataSize : %" PRIu64 "\nnewDataSize : %" PRIu64 "\n",
            (hpatch_StreamPos_t)oldMem.size(),(hpatch_StreamPos_t)newMem.size());
     if (diffSets.isDoDiff){
+        if (diffSets.isDoDiff&&diffSets.isDiffForInplacePatch){
+            printf("\nhdiffi created outDiffFile is ");
+            if (isInplaceASets(diffSets.inplaceSets))
+                printf("inplaceA");
+            else //if (isInplaceBSets(diffSets.inplaceSets))
+                printf("inplaceB");
+            //else
+            //    printf("inplace?");
+            printf(" format for inpalce-patch!\n");
+            printf("  extraSafeSize     : %" PRIu64 "\n",(hpatch_StreamPos_t)diffSets.inplaceSets.extraSafeSize);
+            printf("\n");
+        }
+
         std::vector<hpi_byte> outDiffData;
         try {
+            if (diffSets.isDiffForInplacePatch){
+                create_inplace_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
+                                         outDiffData,diffSets.inplaceSets,compressPlugin,(int)diffSets.matchScore,
+                                         diffSets.isUseBigCacheMatch?true:false,diffSets.threadNum);
+            }else{
                 create_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
                                  outDiffData,compressPlugin,(int)diffSets.matchScore,
                                  diffSets.isUseBigCacheMatch?true:false,0,diffSets.threadNum);
+            }
         }catch(const std::exception& e){
             check(false,HDIFFI_DIFF_ERROR,"diff run error: "+e.what());
         }

@@ -4,7 +4,6 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/HPatchLite/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/HPatchLite?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/HPatchLite/issues)   
 [![Build Status](https://github.com/sisong/HPatchLite/workflows/ci/badge.svg?branch=main)](https://github.com/sisong/HPatchLite/actions?query=workflow%3Aci+branch%3Amain)   
-
  中文版 | [english](README.md)   
 
 HPatchLite 是 [HDiffPatch](https://github.com/sisong/HDiffPatch) 的一个精简(Lite)版，为在超小型嵌入式设备(MCU、NB-IoT等)上执行打补丁(patch)功能而优化。   
@@ -20,7 +19,6 @@ HPatchLite 是 [HDiffPatch](https://github.com/sisong/HDiffPatch) 的一个精�
 ---
 ## 二进制发布包
 [从 release 下载](https://github.com/sisong/HPatchLite/releases) : 分别运行在 Windows、Linux、MacOS操作系统的命令行程序。     
-( 编译出这些发布文件的项目路径在 `HPatchLite/builds` )   
 
 ## 自己编译
 ### Linux or MacOS X ###
