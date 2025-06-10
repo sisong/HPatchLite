@@ -24,7 +24,7 @@ int isSwapToPatchMode(int argc,const char* argv[]);
 int hpatchi_cmd_line(int argc,const char* argv[]);
 
 int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hpi_pos_t newSize,
-                  hpi_pos_t uncompressSize,size_t patchCacheSize);
+                  hpi_pos_t uncompressSize,hpi_BOOL isInplacePatch,size_t extraSafeSize,size_t patchCacheSize);
 
 #ifdef __cplusplus
 }

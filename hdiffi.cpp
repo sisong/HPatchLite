@@ -427,6 +427,8 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
                                &&((op[8]=='\0')||(op[8]=='-')),"-inplace");
                 diffSets.isDiffForInplacePatch=hpi_TRUE;
                 memset(&diffSets.inplaceSets,0,sizeof(diffSets.inplaceSets));
+                //diffSets.inplaceSets.extraSafeSize=0;
+                //diffSets.inplaceSets.isCompatibleLiteDiff=false;
                 diffSets.inplaceSets.isCanExtendCover=true;
                 if (op[8]=='-'){
                     const char* pnum=op+9;
@@ -660,6 +662,9 @@ struct TPatchiChecker{
     const hpi_byte* oldData_end;
     const hpi_byte* diffData_cur;
     const hpi_byte* diffData_end;
+    hpi_BOOL      isInplacePatch;
+    hpi_size_t    extraSafeSize;//for inplace-patch
+    hpatch_size_t newData_cur_pos;//for inplace-patch
 
     static hpi_BOOL _read_diff(hpi_TInputStreamHandle inputStream,hpi_byte* out_data,hpi_size_t* data_size){
         TPatchiChecker& self=*(TPatchiChecker*)inputStream;
@@ -702,9 +707,18 @@ static bool check_lite_diff_by_hpatchi(const hpi_byte* newData,const hpi_byte* n
                                   newData,newData_end,oldData,oldData_end,lite_diff,lite_diff_end};
 
     if (!hpatch_lite_open(listener.base.diff_data,listener.base.read_diff,
-                          &compress_type,&newSize,&uncompressSize)) return hpi_FALSE;
+                          &compress_type,&newSize,&uncompressSize)){
+        listener.diffData_cur=lite_diff; //reread diffData from 0 pos
+        if (hpatchi_inplace_open(listener.base.diff_data,listener.base.read_diff,
+                              &compress_type,&newSize,&uncompressSize,&listener.extraSafeSize)){
+            listener.isInplacePatch=hpi_TRUE;
+            printf("hpatchi run with inplace-patch mode! (extraSafeSize:%" PRIu64 ")\n",(hpatch_StreamPos_t)listener.extraSafeSize);
+        }else
+            return hpi_FALSE;
+    }
     if (newSize!=(size_t)(newData_end-newData)) return hpi_FALSE;
     size_t patchCacheSize=kDecompressBufSize;
-    if (0!=hpatchi_patch(&listener.base,compress_type,newSize,uncompressSize,patchCacheSize)) return hpi_FALSE;
+    if (0!=hpatchi_patch(&listener.base,compress_type,newSize,uncompressSize,
+                         listener.isInplacePatch,listener.extraSafeSize,patchCacheSize)) return hpi_FALSE;
     return listener.newData_cur==listener.newData_end;
 }
