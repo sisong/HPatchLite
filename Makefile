@@ -76,6 +76,7 @@ HDIFF_PATH  := $(HDP_PATH)/libHDiffPatch/HDiff
 HDIFFI_OBJ += \
     hdiffi_import_patch.o \
     $(HDIFF_PATH)/diff.o \
+    $(HDIFF_PATH)/match_inplace.o \
     $(HDIFF_PATH)/match_block.o \
     $(HDIFF_PATH)/private_diff/bytes_rle.o \
     $(HDIFF_PATH)/private_diff/suffix_string.o \

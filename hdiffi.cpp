@@ -3,7 +3,7 @@
 //
 /*
  The MIT License (MIT)
- Copyright (c) 2020-2022 HouSisong All Rights Reserved.
+ Copyright (c) 2020-2025 HouSisong All Rights Reserved.
  */
 
 #include <iostream>
@@ -63,10 +63,11 @@ static void printUsage(){
            "  -inplace[-extraSafeSize]\n"
            "      open inplace mode, DEFAULT closed;\n"
            "      extraSafeSize: extra safe access distances for inplace-patch;\n"
-           "      extraSafeSize>=0, recommended & DEFAULT 0;\n"
+           "      extraSafeSize>=0, DEFAULT 0;\n"
            "      if extraSafeSize>0, need use extra space to cache new data when patch,\n"
            "        thus increasing the chance of matchmaking when diff, also increases \n"
-           "        the complexity of patch code.\n"
+           "        the memory usage by the same amount when patch and increases the \n"
+           "        complexity of patch code.\n"
            "  -cache\n"
            "      set is use a big cache for slow match, DEFAULT false;\n"
            "      if newData not similar to oldData then diff speed++,\n"
@@ -80,8 +81,8 @@ static void printUsage(){
            "      set outDiffFile Compress type, DEFAULT uncompress;\n"
            "      support compress type & level & dict:\n"
 #ifdef _CompressPlugin_tuz
-           "        -c-tuz[-dictSize]               (or -tinyuz)\n"
-           "        -c-tuzi[-dictSize]              (or -tinyuzi)\n"
+           "        -c-tuz[-dictSize]               (or -c-tinyuz)\n"
+           "        -c-tuzi[-dictSize]              (or -c-tinyuzi)\n"
            "            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m,512m..., DEFAULT 32k\n"
            "            Note: -c-tuz is default compressor;\n"
            "            But if your compile tinyuz deccompressor source code, set tuz_isNeedLiteralLine=0,\n"

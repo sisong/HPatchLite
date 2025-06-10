@@ -3,7 +3,7 @@
 //
 /*
  The MIT License (MIT)
- Copyright (c) 2020-2022 HouSisong All Rights Reserved.
+ Copyright (c) 2020-2025 HouSisong All Rights Reserved.
  */
 #include <string.h>
 #include "hdiffi_import_patch.h"
@@ -54,7 +54,7 @@ static void printUsage(){
            "options:\n"
            "  -s[-cacheSize] \n"
            "      DEFAULT -s-32k; cacheSize>=3, can like 256,1k, 60k or 1m etc....\n"
-           "      requires (cacheSize + 1*decompress buffer size)+O(1) bytes of memory.\n"
+           "      requires (cacheSize + 1*decompress buffer size [+ extraSafeSize for inplace-patch])+O(1) bytes of memory.\n"
            "  -f  Force overwrite, ignore write path already exists;\n"
            "      DEFAULT (no -f) not overwrite and then return error;\n"
            "      if used -f and write path is exist directory, will always return error.\n"
