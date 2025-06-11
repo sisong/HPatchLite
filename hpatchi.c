@@ -49,12 +49,17 @@ static void printHelpInfo(){
 static void printUsage(){
     printVersion();
     printf("\n");
-    printf("patch usage: hpatchi [options] oldFile diffFile outNewFile\n"
+    printf("patch   usage: hpatchi [options] oldFile diffFile outNewFile\n"
+           "inplace-patch: hpatchi [options] oldFile diffFile -INPLACE\n"
            "  if oldFile is empty input parameter \"\"\n"
            "options:\n"
            "  -s[-cacheSize] \n"
            "      DEFAULT -s-32k; cacheSize>=3, can like 256,1k, 60k or 1m etc....\n"
            "      requires (cacheSize + 1*decompress buffer size [+ extraSafeSize for inplace-patch])+O(1) bytes of memory.\n"
+           "  -INPLACE\n"
+           "      open inplace-patch mode, DEFAULT closed;\n"
+           "      WANING: oldFile will be modified to newFile when inplace-patch successful,\n"
+           "           and it will be damaged & cannot be recovered when inplace-patch fail.\n"
            "  -f  Force overwrite, ignore write path already exists;\n"
            "      DEFAULT (no -f) not overwrite and then return error;\n"
            "      if used -f and write path is exist directory, will always return error.\n"
@@ -86,6 +91,7 @@ typedef enum THPatchiResult {
 int hpatchi_cmd_line(int argc, const char * argv[]);
 
 int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewFileName,size_t patchCacheSize);
+int hpatchi_inplace(const char* ioOldFileName,const char* diffFileName,size_t patchCacheSize);
 
 #if (_IS_NEED_MAIN)
 #   if (_IS_USED_WIN32_UTF8_WAPI)
@@ -133,6 +139,7 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
     hpatch_BOOL isOutputHelp=_kNULL_VALUE;
     hpatch_BOOL isOutputVersion=_kNULL_VALUE;
     hpatch_BOOL isOldFileInputEmpty=_kNULL_VALUE;
+    hpatch_BOOL isWantInplacePatch=_kNULL_VALUE;
     size_t      patchCacheSize=_kNULL_VALUE;
     #define kMax_arg_values_size 3
     const char* arg_values[kMax_arg_values_size]={0};
@@ -173,6 +180,12 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
                 }else{
                     patchCacheSize=kPatchCacheSize_default;
                 }
+            } break;
+            case 'I':{
+                _options_check((isWantInplacePatch==_kNULL_VALUE)
+                               &&(op[2]=='N')&&(op[3]=='P')&&(op[4]=='L')&&(op[5]=='A')&&(op[6]=='C')&&(op[7]=='E')
+                               &&(op[8]=='\0'),"-INPLACE");
+                isWantInplacePatch=hpi_TRUE;
             } break;
             case 'f':{
                 _options_check((isForceOverwrite==_kNULL_VALUE)&&(op[2]=='\0'),"-f");
@@ -216,9 +229,14 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
         patchCacheSize=kPatchCacheSize_bestmax;
     if (isOldFileInputEmpty==_kNULL_VALUE)
         isOldFileInputEmpty=hpatch_FALSE;
+    if (isWantInplacePatch==_kNULL_VALUE)
+        isWantInplacePatch=hpatch_FALSE;
 
     {//patch default mode
-        _options_check(arg_values_size==3,"input count");
+        _options_check(((arg_values_size==3)&&(!isWantInplacePatch))
+                        ||((arg_values_size==2)&&isWantInplacePatch),"input count");
+        if (isWantInplacePatch)
+            _options_check(!isOldFileInputEmpty,"inplace-patch not support oldFile empty input");
     }
     {//patch
         const char* oldFile     =0;
@@ -227,9 +245,9 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
         {
             oldFile     =arg_values[0];
             diffFileName=arg_values[1];
-            outNewFile  =arg_values[2];
+            outNewFile  =isWantInplacePatch?0:arg_values[2];
         }
-        if (!isForceOverwrite){
+        if ((!isWantInplacePatch)&&(!isForceOverwrite)){
             hpatch_TPathType   outNewFileType;
             _return_check(hpatch_getPathStat(outNewFile,&outNewFileType,0),
                           HPATCHI_PATHTYPE_ERROR,"get outNewFile type");
@@ -237,8 +255,10 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
                           HPATCHI_PATHTYPE_ERROR,"outNewFile already exists, overwrite");
         }
 
-        //patch out new file
-        return hpatchi(oldFile,diffFileName,outNewFile,patchCacheSize);
+        if (isWantInplacePatch)
+            return hpatchi_inplace(oldFile,diffFileName,patchCacheSize);//inplace-patch
+        else
+            return hpatchi(oldFile,diffFileName,outNewFile,patchCacheSize);//patch out new file
     }
 }
 
@@ -252,9 +272,9 @@ int hpatchi_cmd_line(int argc, const char * argv[]){
 
 typedef struct TPatchListener{
     hpatchi_listener_t      base;
-    int                     result;
     hpatch_TStreamInput*    old_file;
-    FILE*                   new_file;
+    hpatch_TStreamOutput*   new_file;
+    hpatch_StreamPos_t      new_write_pos;
 } TPatchListener;
 
 static hpatch_BOOL _read_empty(const struct hpatch_TStreamInput* stream,hpatch_StreamPos_t readFromPos,
@@ -274,8 +294,8 @@ static hpi_BOOL _do_readOld(struct hpatchi_listener_t* listener,hpi_pos_t read_f
 }
 static hpi_BOOL _do_writeNew(struct hpatchi_listener_t* listener,const hpi_byte* data,hpi_size_t data_size){
     TPatchListener* self=(TPatchListener*)listener;
-    hpi_BOOL ret=(data_size==fwrite(data,1,data_size,self->new_file));
-    if (!ret) self->result=HPATCHI_FILEWRITE_ERROR;
+    hpi_BOOL ret=self->new_file->write(self->new_file,self->new_write_pos,data,data+data_size);
+    self->new_write_pos+=data_size;
     return ret;
 }
 
@@ -417,10 +437,10 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     TPatchListener      patchListener;
     hpi_compressType    compress_type;
     hpi_pos_t           uncompressSize;
-    hpi_BOOL      isInplacePatch=hpi_FALSE;
-    hpi_size_t    extraSafeSize=0;//for inplace-patch
+    hpi_pos_t           newSize;
+    hpi_BOOL      isInplacePatch=hpi_FALSE;//saved in diff Data
+    hpi_size_t    extraSafeSize=0;//for inplace-patch, saved in diff Data
 
-    patchListener.result=HPATCHI_SUCCESS;
     hpatch_TFileStreamInput_init(&oldData);
     hpatch_TFileStreamInput_init(&diffData);
     hpatch_TFileStreamOutput_init(&newData);
@@ -444,32 +464,32 @@ int hpatchi(const char* oldFileName,const char* diffFileName,const char* outNewF
     patchListener.base.diff_data=diffData.m_file;
     patchListener.base.read_diff=_do_readDiff;
     {//open diff info
-        hpi_pos_t newSize;
         if (!hpatch_lite_open(patchListener.base.diff_data,patchListener.base.read_diff,
                               &compress_type,&newSize,&uncompressSize)){
             check(_do_reReadDiff(diffData.m_file),HPATCHI_PATCH_OPEN_ERROR,"_do_reReadDiff() run"); //reread diff_data from 0 pos
             if (hpatchi_inplace_open(patchListener.base.diff_data,patchListener.base.read_diff,
                               &compress_type,&newSize,&uncompressSize,&extraSafeSize)){
                 isInplacePatch=hpi_TRUE;
-                printf("hpatchi run with inplace-patch mode! (extraSafeSize:%" PRIu64 ")\n",(hpatch_StreamPos_t)extraSafeSize);
+                printf("newDataSize : %" PRIu64 "\n",(hpatch_StreamPos_t)newSize);
+                printf("hpatchi run patch with inplace-patch data! (extraSafeSize:%" PRIu64 ")\n",(hpatch_StreamPos_t)extraSafeSize);
             }else
                 check(hpatch_FALSE,HPATCHI_PATCH_OPEN_ERROR,"hpatch_lite_open() & hpatchi_inplace_open() run");
         }
 
-        printf("newDataSize : %" PRIu64 "\n",(hpatch_StreamPos_t)newSize);
         check(hpatch_TFileStreamOutput_open(&newData,outNewFileName,newSize),
               HPATCHI_OPENWRITE_ERROR,"open out newFile for write");
     }
 
     patchListener.old_file=&oldData.base;
     patchListener.base.read_old=_do_readOld;
-    patchListener.new_file=newData.m_file;
+    patchListener.new_file=&newData.base;
+    patchListener.new_write_pos=0;
     patchListener.base.write_new=_do_writeNew;
     {
-        int patchret=hpatchi_patch(&patchListener.base,compress_type,(hpi_pos_t)newData.base.streamSize,
+        int patchret=hpatchi_patch(&patchListener.base,compress_type,(hpi_pos_t)newSize,
                                    uncompressSize,isInplacePatch,extraSafeSize,patchCacheSize);
         if (patchret!=HPATCHI_SUCCESS){
-            check(patchListener.result==HPATCHI_SUCCESS,patchListener.result,"patchListener");
+            check(!newData.fileError,HPATCHI_FILEWRITE_ERROR,"newFile write");
             check(!oldData.fileError,HPATCHI_FILEREAD_ERROR,"oldFile read");
             //check(!diffData.fileError,HPATCHI_FILEREAD_ERROR,"diffFile read");
             check(hpatch_FALSE,patchret,"hpatchi_patch() run");
@@ -483,6 +503,84 @@ clear:
     check(hpatch_TFileStreamInput_close(&diffData),HPATCHI_FILECLOSE_ERROR,"diffFile close");
     check(hpatch_TFileStreamInput_close(&oldData),HPATCHI_FILECLOSE_ERROR,"oldFile close");
     printf("\nhpatchi time: %.3f s\n",(clock_s()-time0));
+    return result;
+}
+
+
+int hpatchi_inplace(const char* ioOldFileName,const char* diffFileName,size_t patchCacheSize){
+    int     result=HPATCHI_SUCCESS;
+    int     _isInClear=hpatch_FALSE;
+    double  time0=clock_s();
+    hpatch_TFileStreamOutput    newData;
+    hpatch_TFileStreamInput     diffData;
+    hpatch_TFileStreamInput     oldData;
+    TPatchListener      patchListener;
+    hpi_compressType    compress_type;
+    hpi_pos_t           uncompressSize;
+    hpi_pos_t           newSize;
+    hpi_BOOL      isInplacePatch=hpi_FALSE;//saved in diff Data
+    hpi_size_t    extraSafeSize=0;//for inplace-patch, saved in diff Data
+
+    hpatch_TFileStreamInput_init(&oldData);
+    hpatch_TFileStreamInput_init(&diffData);
+    hpatch_TFileStreamOutput_init(&newData);
+    {//open
+        printf(    "old : \""); hpatch_printPath_utf8(ioOldFileName);
+        printf("\"\ndiff: \""); hpatch_printPath_utf8(diffFileName);
+        printf("\"\nout : "); hpatch_printPath_utf8("(inplace-patch to old file)");
+        printf("\n");
+        check(hpatch_TFileStreamInput_open(&oldData,ioOldFileName),
+                HPATCHI_OPENREAD_ERROR,"open oldFile for read");
+        check(hpatch_TFileStreamInput_open(&diffData,diffFileName),
+              HPATCHI_OPENREAD_ERROR,"open diffFile for read");
+    }
+    printf("oldDataSize : %" PRIu64 "\ndiffDataSize: %" PRIu64 "\n",
+           oldData.base.streamSize,diffData.base.streamSize);
+
+    patchListener.base.diff_data=diffData.m_file;
+    patchListener.base.read_diff=_do_readDiff;
+    {//open diff info
+        if (hpatchi_inplace_open(patchListener.base.diff_data,patchListener.base.read_diff,
+                                 &compress_type,&newSize,&uncompressSize,&extraSafeSize)){
+            isInplacePatch=hpi_TRUE;
+            printf("newDataSize : %" PRIu64 "\n",(hpatch_StreamPos_t)newSize);
+            printf("hpatchi run inplace-patch mode! (extraSafeSize:%" PRIu64 ")\n",(hpatch_StreamPos_t)extraSafeSize);
+        }else
+            check(hpatch_FALSE,HPATCHI_PATCH_OPEN_ERROR,"hpatchi_inplace_open() run");
+
+        
+        check(hpatch_TFileStreamOutput_reopen(&newData,ioOldFileName,newSize>oldData.base.streamSize?newSize:oldData.base.streamSize),
+              HPATCHI_OPENWRITE_ERROR,"open oldFile for write");
+        hpatch_TFileStreamOutput_setRandomOut(&newData,hpatch_TRUE); //can rewrite
+    }
+
+    patchListener.old_file=&oldData.base;
+    patchListener.base.read_old=_do_readOld;
+    patchListener.new_file=&newData.base;
+    patchListener.new_write_pos=0;
+    patchListener.base.write_new=_do_writeNew;
+    {
+        int patchret=hpatchi_patch(&patchListener.base,compress_type,(hpi_pos_t)newSize,
+                                   uncompressSize,isInplacePatch,extraSafeSize,patchCacheSize);
+        if (patchret!=HPATCHI_SUCCESS){
+            check(!newData.fileError,HPATCHI_FILEWRITE_ERROR,"newFile write");
+            check(!oldData.fileError,HPATCHI_FILEREAD_ERROR,"oldFile read");
+            //check(!diffData.fileError,HPATCHI_FILEREAD_ERROR,"diffFile read");
+            check(hpatch_FALSE,patchret,"hpatchi_patch() run");
+        }
+        printf("  inplace-patch ok!\n");
+    }
+
+clear:
+    _isInClear=hpatch_TRUE;
+    check(hpatch_TFileStreamInput_close(&diffData),HPATCHI_FILECLOSE_ERROR,"diffFile close");
+    check(hpatch_TFileStreamInput_close(&oldData),HPATCHI_FILECLOSE_ERROR,"oldFile close");
+    if ((result==HPATCHI_SUCCESS)&&(newSize<oldData.base.streamSize)){
+        check(hpatch_TFileStreamOutput_truncate(&newData,newSize),
+              HPATCHI_FILEWRITE_ERROR,"out newFile truncate to newSize");
+    }
+    check(hpatch_TFileStreamOutput_close(&newData),HPATCHI_FILECLOSE_ERROR,"out newFile close");
+    printf("\nhpatchi inplace-patch time: %.3f s\n",(clock_s()-time0));
     return result;
 }
 

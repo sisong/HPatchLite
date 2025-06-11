@@ -61,7 +61,7 @@ static void printUsage(){
            "        bytes of memory;\n"
            "      matchScore>=0, DEFAULT -m-6\n"
            "  -inplace[-extraSafeSize]\n"
-           "      open inplace mode, DEFAULT closed;\n"
+           "      open create inplace-patch mode, DEFAULT closed;\n"
            "      extraSafeSize: extra safe access distances for inplace-patch;\n"
            "      extraSafeSize>=0, DEFAULT 0;\n"
            "      if extraSafeSize>0, need use extra space to cache new data when patch,\n"
@@ -83,10 +83,10 @@ static void printUsage(){
 #ifdef _CompressPlugin_tuz
            "        -c-tuz[-dictSize]               (or -c-tinyuz)\n"
            "        -c-tuzi[-dictSize]              (or -c-tinyuzi)\n"
-           "            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m,512m..., DEFAULT 32k\n"
+           "            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m..., DEFAULT 32k\n"
            "            Note: -c-tuz is default compressor;\n"
-           "            But if your compile tinyuz deccompressor source code, set tuz_isNeedLiteralLine=0,\n"
-           "            then must used -c-tuzi compressor.\n"
+           "            But if your compile tinyuz deccompressor source code by yourself,\n"
+           "             & set tuz_isNeedLiteralLine=0, then must used -c-tuzi compressor.\n"
 #endif
 #ifdef _CompressPlugin_zlib
            "        -c-zlib[-{1..9}[-dictBits]]     DEFAULT level 9\n"
@@ -713,7 +713,7 @@ static bool check_lite_diff_by_hpatchi(const hpi_byte* newData,const hpi_byte* n
         if (hpatchi_inplace_open(listener.base.diff_data,listener.base.read_diff,
                               &compress_type,&newSize,&uncompressSize,&listener.extraSafeSize)){
             listener.isInplacePatch=hpi_TRUE;
-            printf("hpatchi run with inplace-patch mode! (extraSafeSize:%" PRIu64 ")\n",(hpatch_StreamPos_t)listener.extraSafeSize);
+            printf("hpatchi run patch with inplace-patch data! (extraSafeSize:%" PRIu64 ")\n",(hpatch_StreamPos_t)listener.extraSafeSize);
         }else
             return hpi_FALSE;
     }
