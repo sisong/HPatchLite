@@ -48,7 +48,7 @@ $ git clone --recursive https://github.com/sisong/HPatchLite.git
       需要的内存大小:(新版本文件大小+ 旧版本文件大小*5(或*9 当旧版本文件大小>=2GB时))+O(1);
       匹配分数matchScore>=0,默认为6,一般输入数据的可压缩性越大,这个值就可以越大。
   -inplace[-extraSafeSize]
-      开启 原地更新 模式, 默认关闭;
+      打开创建原地更新补丁包模式, 默认关闭;
       extraSafeSize: 原地更新的额外安全访问距离;
       extraSafeSize>=0, 默认 0;
       如果 extraSafeSize>0, patch时需要使用额外的空间来缓存新版本的数据，从而增加了diff时
@@ -66,8 +66,7 @@ $ git clone --recursive https://github.com/sisong/HPatchLite.git
       支持的压缩算法、压缩级别和字典大小等:
         -c-tuz[-dictSize]               (或者 -c-tinyuz)
         -c-tuzi[-dictSize]              (或者 -c-tinyuzi)
-            压缩字典大小dictSize范围1字节到1GB, 默认为 32k；
-            也可以设置为 250,511,1k,4k,64k,1m,64m,512m等
+            压缩字典大小dictSize范围1字节到1GB,可以设置为250,511,1k,4k,64k,1m,64m等,默认为32k；
             注意: -c-tuz 是默认的压缩器;
             但如果你自己编译 tinyuz 的解压缩代码的时候，设置了 tuz_isNeedLiteralLine=0 编
             译参数, 这时你必须使用 -c-tuzi 压缩器。
@@ -97,13 +96,18 @@ $ git clone --recursive https://github.com/sisong/HPatchLite.git
 
 ## **patch** 命令行使用:  
 ```
-打补丁: hpatchi [options] oldFile diffFile outNewFile
+打补丁  : hpatchi [options] oldFile diffFile outNewFile
+原地更新: hpatchi [options] oldFile diffFile -INPLACE
   如果oldFile为空, 输入参数为 ""
-options:
+选项:
   -s[-cacheSize]
       默认设置为-s-32k; 缓冲区cacheSize>=3;
       可以设置为256,1k,60k,1m等
       打补丁需要的总内存大小: (cacheSize + 1*解压缩缓冲区 [+ extraSafeSize 用于原地更新])+O(1)
+  -INPLACE
+      打开原地更新模式, 默认关闭;
+      警告: 原地更新成功后，旧文件oldFile 会被直接修改为新文件；而如果原地更新失败，
+           旧文件可能会被损坏且无法恢复。
   -f  强制文件写覆盖, 忽略输出的路径是否已经存在;
       默认不执行覆盖, 如果输出路径已经存在, 直接返回错误;
       如果设置了-f,但路径已经存在并且是一个文件夹, 那么会始终返回错误。

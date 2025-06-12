@@ -49,7 +49,7 @@ options:
         bytes of memory;
       matchScore>=0, DEFAULT -m-6
   -inplace[-extraSafeSize]
-      open inplace mode, DEFAULT closed;
+      open create inplace-patch mode, DEFAULT closed;
       extraSafeSize: extra safe access distances for inplace-patch;
       extraSafeSize>=0, DEFAULT 0;
       if extraSafeSize>0, need use extra space to cache new data when patch,
@@ -68,10 +68,10 @@ options:
       support compress type & level & dict:
         -c-tuz[-dictSize]               (or -c-tinyuz)
         -c-tuzi[-dictSize]              (or -c-tinyuzi)
-            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m,512m..., DEFAULT 32k
+            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m..., DEFAULT 32k
             Note: -c-tuz is default compressor;
-            But if your compile tinyuz deccompressor source code, set tuz_isNeedLiteralLine=0,
-            then must used -c-tuzi compressor.
+            But if your compile tinyuz deccompressor source code by yourself,
+             & set tuz_isNeedLiteralLine=0, then must used -c-tuzi compressor.
         -c-zlib[-{1..9}[-dictBits]]     DEFAULT level 9
             dictBits can 9--15, DEFAULT 15.
         -c-pzlib[-{1..9}[-dictBits]]    DEFAULT level 6
@@ -98,12 +98,17 @@ options:
 
 ## **patch** command line usage:  
 ```
-patch usage: hpatchi [options] oldFile diffFile outNewFile
+patch   usage: hpatchi [options] oldFile diffFile outNewFile
+inplace-patch: hpatchi [options] oldFile diffFile -INPLACE
   if oldFile is empty input parameter ""
 options:
   -s[-cacheSize]
       DEFAULT -s-32k; cacheSize>=3, can like 256,1k, 60k or 1m etc....
       requires (cacheSize + 1*decompress buffer size [+ extraSafeSize for inplace-patch])+O(1) bytes of memory.
+  -INPLACE
+      open inplace-patch mode, DEFAULT closed;
+      WANING: oldFile will be modified to newFile when inplace-patch successful,
+           and it will be damaged & cannot be recovered when inplace-patch fail.
   -f  Force overwrite, ignore write path already exists;
       DEFAULT (no -f) not overwrite and then return error;
       if used -f and write path is exist directory, will always return error.
