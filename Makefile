@@ -6,6 +6,7 @@ ZLIB     := 1
 LZMA     := 1
 ARM64ASM := 0
 STATIC_CPP := 0
+STATIC_C := 0
 # used clang?
 CL  	   := 0
 # build with -m32?
@@ -75,6 +76,7 @@ HDIFF_PATH  := $(HDP_PATH)/libHDiffPatch/HDiff
 HDIFFI_OBJ += \
     hdiffi_import_patch.o \
     $(HDIFF_PATH)/diff.o \
+    $(HDIFF_PATH)/match_inplace.o \
     $(HDIFF_PATH)/match_block.o \
     $(HDIFF_PATH)/private_diff/bytes_rle.o \
     $(HDIFF_PATH)/private_diff/suffix_string.o \
@@ -139,34 +141,38 @@ ifeq ($(MT),0)
 else
   DEF_FLAGS += \
     -D_IS_USED_MULTITHREAD=1 \
-    -D_IS_USED_PTHREAD=1
+    -D_IS_USED_CPP11THREAD=1
 endif
 
 PATCH_LINK := 
 ifeq ($(ZLIB),2)
   PATCH_LINK += -lz			# link zlib
 endif
+ifeq ($(M32),0)
+else
+  PATCH_LINK += -m32
+endif
+ifeq ($(MINS),0)
+else
+  PATCH_LINK += -s -Wl,--gc-sections,--as-needed
+endif
+ifeq ($(STATIC_C),0)
+else
+  PATCH_LINK += -static
+endif
 DIFF_LINK  := $(PATCH_LINK)
 ifeq ($(MT),0)
 else
   DIFF_LINK += -lpthread	# link pthread
 endif
-ifeq ($(M32),0)
-else
-  DIFF_LINK += -m32
-endif
-ifeq ($(MINS),0)
-else
-  DIFF_LINK += -Wl,--gc-sections,--as-needed
-endif
-ifeq ($(CL),1)
-  CXX := clang++
-  CC  := clang
-endif
 ifeq ($(STATIC_CPP),0)
   DIFF_LINK += -lstdc++
 else
   DIFF_LINK += -static-libstdc++
+endif
+ifeq ($(CL),1)
+  CXX := clang++
+  CC  := clang
 endif
 
 CFLAGS   += $(DEF_FLAGS) 

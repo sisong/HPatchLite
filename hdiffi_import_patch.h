@@ -11,9 +11,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define HPATCHLITE_VERSION_MAJOR    0
-#define HPATCHLITE_VERSION_MINOR    4
-#define HPATCHLITE_VERSION_RELEASE  3
+#define HPATCHLITE_VERSION_MAJOR    1
+#define HPATCHLITE_VERSION_MINOR    0
+#define HPATCHLITE_VERSION_RELEASE  0
 
 #define _HPATCHLITE_VERSION          HPATCHLITE_VERSION_MAJOR.HPATCHLITE_VERSION_MINOR.HPATCHLITE_VERSION_RELEASE
 #define _HDIFFPATCH_QUOTE(str) #str
@@ -24,7 +24,7 @@ int isSwapToPatchMode(int argc,const char* argv[]);
 int hpatchi_cmd_line(int argc,const char* argv[]);
 
 int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hpi_pos_t newSize,
-                  hpi_pos_t uncompressSize,size_t patchCacheSize);
+                  hpi_pos_t uncompressSize,hpi_BOOL isInplacePatch,size_t extraSafeSize,size_t patchCacheSize);
 
 #ifdef __cplusplus
 }

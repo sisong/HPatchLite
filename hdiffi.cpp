@@ -3,7 +3,7 @@
 //
 /*
  The MIT License (MIT)
- Copyright (c) 2020-2022 HouSisong All Rights Reserved.
+ Copyright (c) 2020-2025 HouSisong All Rights Reserved.
  */
 
 #include <iostream>
@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "HDiffPatch/libParallel/parallel_import.h"
 #include "HDiffPatch/libHDiffPatch/HDiff/diff_for_hpatch_lite.h"
 #include "HDiffPatch/libHDiffPatch/HPatchLite/hpatch_lite.h"
 #include "HDiffPatch/_clock_for_demo.h"
@@ -54,13 +55,20 @@ static void printUsage(){
     printf("diff    usage: hdiffi [options] oldFile newFile outDiffFile\n"
            "test    usage: hdiffi    -t     oldFile newFile testDiffFile\n"
            "  oldFile can empty, and input parameter \"\"\n"
-           "memory options:\n"
+           "options:\n"
            "  -m[-matchScore]\n"
            "      requires (newFileSize+ oldFileSize*5(or *9 when oldFileSize>=2GB))+O(1)\n"
            "        bytes of memory;\n"
            "      matchScore>=0, DEFAULT -m-6\n"
-           "special options:\n"
-           "  -cache \n"
+           "  -inplace[-extraSafeSize]\n"
+           "      open create inplace-patch mode, DEFAULT closed;\n"
+           "      extraSafeSize: extra safe access distances for inplace-patch;\n"
+           "      extraSafeSize>=0, DEFAULT 0;\n"
+           "      if extraSafeSize>0, need use extra space to cache new data when patch,\n"
+           "        thus increasing the chance of matchmaking when diff, also increases \n"
+           "        the memory usage by the same amount when patch and increases the \n"
+           "        complexity of patch code.\n"
+           "  -cache\n"
            "      set is use a big cache for slow match, DEFAULT false;\n"
            "      if newData not similar to oldData then diff speed++,\n"
            "      big cache max used O(oldFileSize) memory, and build slow(diff speed--)\n" 
@@ -73,12 +81,12 @@ static void printUsage(){
            "      set outDiffFile Compress type, DEFAULT uncompress;\n"
            "      support compress type & level & dict:\n"
 #ifdef _CompressPlugin_tuz
-           "        -c-tuz[-dictSize]               (or -tinyuz)\n"
-           "        -c-tuzi[-dictSize]              (or -tinyuzi)\n"
-           "            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m,512m..., DEFAULT 32k\n"
+           "        -c-tuz[-dictSize]               (or -c-tinyuz)\n"
+           "        -c-tuzi[-dictSize]              (or -c-tinyuzi)\n"
+           "            1<=dictSize<=1g, can like 250,511,1k,4k,64k,1m,64m..., DEFAULT 32k\n"
            "            Note: -c-tuz is default compressor;\n"
-           "            But if your compile tinyuz deccompressor source code, set tuz_isNeedLiteralLine=0,\n"
-           "            then must used -c-tuzi compressor.\n"
+           "            But if your compile tinyuz deccompressor source code by yourself,\n"
+           "             & set tuz_isNeedLiteralLine=0, then must used -c-tuzi compressor.\n"
 #endif
 #ifdef _CompressPlugin_zlib
            "        -c-zlib[-{1..9}[-dictBits]]     DEFAULT level 9\n"
@@ -126,18 +134,20 @@ typedef enum THDiffiResult {
     HDIFFI_MEM_ERROR, // 5
     HDIFFI_DIFF_ERROR,
     HDIFFI_PATCH_ERROR,
-
     HDIFFI_PATHTYPE_ERROR,
 } THDiffiResult;
 
 int hdiffi_cmd_line(int argc,const char * argv[]);
 
 struct TDiffiSets{
+    hpi_BOOL isDiffForInplacePatch;
     hpi_BOOL isDiffInMem;
     hpi_BOOL isUseBigCacheMatch;
     size_t   matchScore;
     hpi_BOOL isDoDiff;
     hpi_BOOL isDoPatchCheck;
+    size_t   threadNum;
+    TInplaceSets inplaceSets;
 };
 
 int hdiffi(const char* oldFileName,const char* newFileName,const char* outDiffFileName,
@@ -286,7 +296,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
 #ifdef _CompressPlugin_tuz
     __getCompressSet(_tryGetCompressSet(&isMatchedType,
                                         ptype,ptypeEnd,"tuz","tinyuz",
-                                        &dictSize,1,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuz-?"){
+                                        &dictSize,tuz_kMinOfDictSize,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuz-?"){
         static TCompressPlugin_tuz _tuzCompressPlugin=tuzCompressPlugin;
         _tuzCompressPlugin.props.dictSize=(tuz_size_t)dictSize;
         _tuzCompressPlugin.props.isNeedLiteralLine=true;
@@ -294,7 +304,7 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
         out_compressPlugin->compress_type=hpi_compressType_tuz; }}
     __getCompressSet(_tryGetCompressSet(&isMatchedType,
                                         ptype,ptypeEnd,"tuzi","tinyuzi",
-                                        &dictSize,1,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuzi-?"){
+                                        &dictSize,tuz_kMinOfDictSize,tuz_kMaxOfDictSize,defaultDictSize),"-c-tuzi-?"){
         static TCompressPlugin_tuz _tuzCompressPlugin=tuzCompressPlugin;
         _tuzCompressPlugin.props.dictSize=(tuz_size_t)dictSize;
         _tuzCompressPlugin.props.isNeedLiteralLine=false;
@@ -320,15 +330,16 @@ static int _checkSetCompress(hdiffi_TCompress* out_compressPlugin,
 int hdiffi_cmd_line(int argc, const char * argv[]){
     TDiffiSets diffSets;
     memset(&diffSets,0,sizeof(diffSets));
+    diffSets.isDiffForInplacePatch=_kNULL_VALUE;
     diffSets.isDiffInMem=_kNULL_VALUE;
     diffSets.isDoDiff =_kNULL_VALUE;
     diffSets.isDoPatchCheck=_kNULL_VALUE;
     diffSets.isUseBigCacheMatch =_kNULL_VALUE;
+    diffSets.threadNum = _THREAD_NUMBER_NULL;
     hpi_BOOL isForceOverwrite=_kNULL_VALUE;
     hpi_BOOL isOutputHelp=_kNULL_VALUE;
     hpi_BOOL isOutputVersion=_kNULL_VALUE;
     hpi_BOOL isOldFileInputEmpty=_kNULL_VALUE;
-    size_t      threadNum = _THREAD_NUMBER_NULL;
     hdiffi_TCompress      compressPlugin={0,hpi_compressType_no};
     std::vector<const char *> arg_values;
     if (argc<=1){
@@ -389,10 +400,10 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
             } break;
 #if (_IS_USED_MULTITHREAD)
             case 'p':{
-                _options_check((threadNum==_THREAD_NUMBER_NULL)&&(op[2]=='-'),"-p-?");
+                _options_check((diffSets.threadNum==_THREAD_NUMBER_NULL)&&(op[2]=='-'),"-p-?");
                 const char* pnum=op+3;
-                _options_check(a_to_size(pnum,strlen(pnum),&threadNum),"-p-?");
-                _options_check(threadNum>=_THREAD_NUMBER_MIN,"-p-?");
+                _options_check(a_to_size(pnum,strlen(pnum),&diffSets.threadNum),"-p-?");
+                _options_check(diffSets.threadNum>=_THREAD_NUMBER_MIN,"-p-?");
             } break;
 #endif
             case 'c':{
@@ -409,6 +420,20 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
                     diffSets.isUseBigCacheMatch=hpi_TRUE; //use big cache for match 
                 }else{
                     _options_check(false,"-c?");
+                }
+            } break;
+            case 'i':{
+                _options_check((diffSets.isDiffForInplacePatch==_kNULL_VALUE)
+                               &&(op[2]=='n')&&(op[3]=='p')&&(op[4]=='l')&&(op[5]=='a')&&(op[6]=='c')&&(op[7]=='e')
+                               &&((op[8]=='\0')||(op[8]=='-')),"-inplace");
+                diffSets.isDiffForInplacePatch=hpi_TRUE;
+                memset(&diffSets.inplaceSets,0,sizeof(diffSets.inplaceSets));
+                //diffSets.inplaceSets.extraSafeSize=0;
+                //diffSets.inplaceSets.isCompatibleLiteDiff=false;
+                diffSets.inplaceSets.isCanExtendCover=true;
+                if (op[8]=='-'){
+                    const char* pnum=op+9;
+                    _options_check(kmg_to_size(pnum,strlen(pnum),&diffSets.inplaceSets.extraSafeSize),"-extraSafeSize?");
                 }
             } break;
             default: {
@@ -431,13 +456,15 @@ int hdiffi_cmd_line(int argc, const char * argv[]){
         if (arg_values.empty())
             return 0; //ok
     }
-    if (threadNum==_THREAD_NUMBER_NULL)
-        threadNum=_THREAD_NUMBER_DEFUALT;
-    else if (threadNum>_THREAD_NUMBER_MAX)
-        threadNum=_THREAD_NUMBER_MAX;
+    if (diffSets.isDiffForInplacePatch==_kNULL_VALUE)
+        diffSets.isDiffForInplacePatch=hpi_FALSE;
+    if (diffSets.threadNum==_THREAD_NUMBER_NULL)
+        diffSets.threadNum=_THREAD_NUMBER_DEFUALT;
+    else if (diffSets.threadNum>_THREAD_NUMBER_MAX)
+        diffSets.threadNum=_THREAD_NUMBER_MAX;
     if (compressPlugin.compress!=0){
         hdiff_TCompress* compress=(hdiff_TCompress*)compressPlugin.compress;
-        compress->setParallelThreadNumber(compress,(int)threadNum);
+        compress->setParallelThreadNumber(compress,(int)diffSets.threadNum);
     }
     
     if (isOldFileInputEmpty==_kNULL_VALUE)
@@ -531,10 +558,30 @@ static int hdiffi_in_mem(const char* oldFileName,const char* newFileName,const c
     printf("oldDataSize : %" PRIu64 "\nnewDataSize : %" PRIu64 "\n",
            (hpatch_StreamPos_t)oldMem.size(),(hpatch_StreamPos_t)newMem.size());
     if (diffSets.isDoDiff){
+        if (diffSets.isDoDiff&&diffSets.isDiffForInplacePatch){
+            printf("\nhdiffi created outDiffFile is ");
+            if (isInplaceASets(diffSets.inplaceSets))
+                printf("inplaceA");
+            else //if (isInplaceBSets(diffSets.inplaceSets))
+                printf("inplaceB");
+            //else
+            //    printf("inplace?");
+            printf(" format for inpalce-patch!\n");
+            printf("  extraSafeSize     : %" PRIu64 "\n",(hpatch_StreamPos_t)diffSets.inplaceSets.extraSafeSize);
+            printf("\n");
+        }
+
         std::vector<hpi_byte> outDiffData;
         try {
-            create_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
-                             outDiffData,compressPlugin,(int)diffSets.matchScore,diffSets.isUseBigCacheMatch?true:false);
+            if (diffSets.isDiffForInplacePatch){
+                create_inplace_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
+                                         outDiffData,diffSets.inplaceSets,compressPlugin,(int)diffSets.matchScore,
+                                         diffSets.isUseBigCacheMatch?true:false,diffSets.threadNum);
+            }else{
+                create_lite_diff(newMem.data(),newMem.data_end(),oldMem.data(),oldMem.data_end(),
+                                 outDiffData,compressPlugin,(int)diffSets.matchScore,
+                                 diffSets.isUseBigCacheMatch?true:false,0,diffSets.threadNum);
+            }
         }catch(const std::exception& e){
             check(false,HDIFFI_DIFF_ERROR,"diff run error: "+e.what());
         }
@@ -616,6 +663,9 @@ struct TPatchiChecker{
     const hpi_byte* oldData_end;
     const hpi_byte* diffData_cur;
     const hpi_byte* diffData_end;
+    hpi_BOOL      isInplacePatch;
+    hpi_size_t    extraSafeSize;//for inplace-patch
+    hpatch_size_t newData_cur_pos;//for inplace-patch
 
     static hpi_BOOL _read_diff(hpi_TInputStreamHandle inputStream,hpi_byte* out_data,hpi_size_t* data_size){
         TPatchiChecker& self=*(TPatchiChecker*)inputStream;
@@ -658,9 +708,18 @@ static bool check_lite_diff_by_hpatchi(const hpi_byte* newData,const hpi_byte* n
                                   newData,newData_end,oldData,oldData_end,lite_diff,lite_diff_end};
 
     if (!hpatch_lite_open(listener.base.diff_data,listener.base.read_diff,
-                          &compress_type,&newSize,&uncompressSize)) return hpi_FALSE;
+                          &compress_type,&newSize,&uncompressSize)){
+        listener.diffData_cur=lite_diff; //reread diffData from 0 pos
+        if (hpatchi_inplace_open(listener.base.diff_data,listener.base.read_diff,
+                              &compress_type,&newSize,&uncompressSize,&listener.extraSafeSize)){
+            listener.isInplacePatch=hpi_TRUE;
+            printf("hpatchi run patch with inplace-patch data! (extraSafeSize:%" PRIu64 ")\n",(hpatch_StreamPos_t)listener.extraSafeSize);
+        }else
+            return hpi_FALSE;
+    }
     if (newSize!=(size_t)(newData_end-newData)) return hpi_FALSE;
     size_t patchCacheSize=kDecompressBufSize;
-    if (0!=hpatchi_patch(&listener.base,compress_type,newSize,uncompressSize,patchCacheSize)) return hpi_FALSE;
+    if (0!=hpatchi_patch(&listener.base,compress_type,newSize,uncompressSize,
+                         listener.isInplacePatch,listener.extraSafeSize,patchCacheSize)) return hpi_FALSE;
     return listener.newData_cur==listener.newData_end;
 }

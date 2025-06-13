@@ -33,6 +33,7 @@
 		0DB0B09F28322BA1007DC717 /* compress_parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B09928322BA1007DC717 /* compress_parallel.cpp */; };
 		0DB0B0A028322BA1007DC717 /* parallel_channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B09B28322BA1007DC717 /* parallel_channel.cpp */; };
 		0DB0B0A128322BA1007DC717 /* parallel_import.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DB0B09D28322BA1007DC717 /* parallel_import.cpp */; };
+		0DE343BD2DF808280000234B /* match_inplace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DE343BC2DF808280000234B /* match_inplace.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -101,6 +102,7 @@
 		0DB0B09C28322BA1007DC717 /* parallel_import.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parallel_import.h; sourceTree = "<group>"; };
 		0DB0B09D28322BA1007DC717 /* parallel_import.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parallel_import.cpp; sourceTree = "<group>"; };
 		0DB0B09E28322BA1007DC717 /* parallel_channel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parallel_channel.h; sourceTree = "<group>"; };
+		0DE343BC2DF808280000234B /* match_inplace.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = match_inplace.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +192,7 @@
 		0DB0B05E2832276B007DC717 /* HDiff */ = {
 			isa = PBXGroup;
 			children = (
+				0DE343BC2DF808280000234B /* match_inplace.cpp */,
 				0DB0B05F2832276B007DC717 /* diff_for_hpatch_lite.h */,
 				0DB0B0602832276B007DC717 /* diff_types.h */,
 				0DB0B0612832276B007DC717 /* match_block.h */,
@@ -335,6 +338,7 @@
 				0DB0B0862832276B007DC717 /* compress_detect.cpp in Sources */,
 				0DB0B0832832276B007DC717 /* hpatch_lite.c in Sources */,
 				0DB0B05228322742007DC717 /* file_for_patch.c in Sources */,
+				0DE343BD2DF808280000234B /* match_inplace.cpp in Sources */,
 				0DB0B08B2832276B007DC717 /* adler_roll.c in Sources */,
 				0DB0B041283226D6007DC717 /* hdiffi_import_patch.c in Sources */,
 				0DB0B08A2832276B007DC717 /* stream_serialize.cpp in Sources */,
