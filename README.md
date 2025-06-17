@@ -151,7 +151,9 @@ hpi_BOOL hpatchi_inplaceB(hpatchi_listener_t* listener,hpi_pos_t newSize,
   1. Use the `hpatch_lite_open` function to open the patch data, diff_data is the handle pointing to the patch data, and read_diff is the function that reads the patch data sequentially through the handle.
   1. After opening the patch, you can get the compression algorithm type compress_type used by the patch and the amount of data that can be decompressed uncompressSize; if there is compression, then use the corresponding decompression algorithm to wrap diff_data and read_diff to get new diff_data and read_diff that can read uncompressed data;
   1. Fill an hpatchi_listener_t structure to call `hpatch_lite_patch`; read_old is used to randomly read the old version of the data, and write_new is used to sequentially write the new version of the newSize size of data.
-  1. If inplace-patch are used, replace `hpatch_lite_open` with `hpatchi_inplace_open` and `hpatch_lite_patch` with `hpatchi_inplaceB`. When alloc memory for temp_cache, memory size need to add **extraSafeSize**. (best practices: when needed, after obtaining extraSafeSize, you can add an min-write block size of storage chips to extraSafeSize, this simplifies the implementation of read_old & write_new.)
+  1. If inplace-patch are used, replace `hpatch_lite_open` with `hpatchi_inplace_open` and `hpatch_lite_patch` with `hpatchi_inplaceB`. When alloc memory for temp_cache, memory size need to add **extraSafeSize**. 
+  (best practices: when needed, after obtaining extraSafeSize, you can add an min-write page size of storage chips to extraSafeSize, this simplifies the implementation of read_old & write_new;
+  or you can choose to cache the data of the min-write page size yourself, so that you can write aligned full pages of data each time.)
 
 ---
 ## Contact

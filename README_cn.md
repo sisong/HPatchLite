@@ -153,7 +153,9 @@ hpi_BOOL hpatchi_inplaceB(hpatchi_listener_t* listener,hpi_pos_t newSize,
   1. 打开补丁后，可以获得补丁使用的压缩算法类型 compress_type 和 能够解压出的数据量 uncompressSize；
  如果有压缩，那么通过对应的解压缩算法对 diff_data 和 read_diff 进行包装，得到新的可读取未压缩数据的 diff_data 和 read_diff；
   1. 填充一个 hpatchi_listener_t 结构，用以调用 `hpatch_lite_patch` ；其中 read_old 用于随机读取老版本的数据，write_new 用于顺序写入新版本的 newSize 大小的数据。
-  1. 如果使用原地更新，那么将 `hpatch_lite_open` 替换成 `hpatchi_inplace_open`，将 `hpatch_lite_patch` 替换成 `hpatchi_inplaceB`； 给 temp_cache 申请内存时，需要额外多申请 **extraSafeSize**。(最佳实践：当需要时，在获取 extraSafeSize 后，可以将存储芯片的最小写入块大小添加到 extraSafeSize 中，这样可以简化 read_old 和 write_new 的实现。)
+  1. 如果使用原地更新，那么将 `hpatch_lite_open` 替换成 `hpatchi_inplace_open`，将 `hpatch_lite_patch` 替换成 `hpatchi_inplaceB`；给 temp_cache 申请内存时，需要额外多申请 **extraSafeSize**。
+  (最佳实践：当需要时，在获取 extraSafeSize 后，可以将存储芯片的最小写入页大小添加到 extraSafeSize 中，这样可以简化 read_old 和 write_new 的实现;
+  或者也可以选择自己缓存最小写入页大小的数据，这样每次都能写入对齐的整页数据。)
 
 
 ---
