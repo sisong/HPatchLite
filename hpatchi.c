@@ -116,7 +116,7 @@ int main(int argc, const char * argv[]){
     if (!(value)) { LOG_ERR("options " errorInfo " ERROR!\n\n"); \
         printHelpInfo(); return HPATCHI_OPTIONS_ERROR; } }
 
-#define kPatchCacheSize_min      ((hpi_kMinCacheSize+1)/2 *3)
+#define kPatchCacheSize_min      (hpi_kMinInplaceCacheSize+1)
 #define kPatchCacheSize_default  (1024*8 *4)
 #define kPatchCacheSize_bestmax  (1024*1024*16 *4)
 
@@ -329,7 +329,7 @@ int hpatchi_patch(hpatchi_listener_t* listener,hpi_compressType compress_type,hp
     hpi_byte*       pmem=0;
     hpi_byte*       temp_cache;
     // patchCacheSize 1/4 for decompress input buf, 3/4 for patch buf
-    size_t          patchBufSize=(size_t)( ((hpatch_uint64_t)patchCacheSize+1)*3/4>>1<<1 );
+    size_t          patchBufSize=(size_t)( ((hpatch_uint64_t)patchCacheSize+1)*3/4);
     const size_t    decBufSize=patchCacheSize-patchBufSize;
 #ifdef _CompressPlugin_tuz
     tuz_TStream     tuzStream;
