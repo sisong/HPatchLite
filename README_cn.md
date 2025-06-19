@@ -1,5 +1,5 @@
 # [HPatchLite](https://github.com/sisong/HPatchLite)
-[![release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
+[![release](https://img.shields.io/badge/release-v1.0.1-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/HPatchLite/blob/main/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/HPatchLite/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/HPatchLite?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/HPatchLite/issues)   
@@ -154,8 +154,7 @@ hpi_BOOL hpatchi_inplaceB(hpatchi_listener_t* listener,hpi_pos_t newSize,
  如果有压缩，那么通过对应的解压缩算法对 diff_data 和 read_diff 进行包装，得到新的可读取未压缩数据的 diff_data 和 read_diff；
   1. 填充一个 hpatchi_listener_t 结构，用以调用 `hpatch_lite_patch` ；其中 read_old 用于随机读取老版本的数据，write_new 用于顺序写入新版本的 newSize 大小的数据。
   1. 如果使用原地更新，那么将 `hpatch_lite_open` 替换成 `hpatchi_inplace_open`，将 `hpatch_lite_patch` 替换成 `hpatchi_inplaceB`；给 temp_cache 申请内存时，需要额外多申请 **extraSafeSize**。
-  (最佳实践：当需要时，在获取 extraSafeSize 后，可以将存储芯片的最小写入页大小添加到 extraSafeSize 中，这样可以简化 read_old 和 write_new 的实现;
-  或者也可以选择自己缓存最小写入页大小的数据，这样每次都能写入对齐的整页数据。)
+  (最佳实践：如果你需要每次写入对齐的整页数据，那可以在编译时设置_IS_WTITE_NEW_BY_PAGE=1，从而可以调用`hpatchi_inplaceB_by_page`。)
 
 
 ---

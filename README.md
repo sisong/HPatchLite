@@ -1,5 +1,5 @@
 # [HPatchLite](https://github.com/sisong/HPatchLite)
-[![release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
+[![release](https://img.shields.io/badge/release-v1.0.1-blue.svg)](https://github.com/sisong/HPatchLite/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/HPatchLite/blob/main/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/HPatchLite/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/HPatchLite?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/HPatchLite/issues)   
@@ -152,8 +152,7 @@ hpi_BOOL hpatchi_inplaceB(hpatchi_listener_t* listener,hpi_pos_t newSize,
   1. After opening the patch, you can get the compression algorithm type compress_type used by the patch and the amount of data that can be decompressed uncompressSize; if there is compression, then use the corresponding decompression algorithm to wrap diff_data and read_diff to get new diff_data and read_diff that can read uncompressed data;
   1. Fill an hpatchi_listener_t structure to call `hpatch_lite_patch`; read_old is used to randomly read the old version of the data, and write_new is used to sequentially write the new version of the newSize size of data.
   1. If inplace-patch are used, replace `hpatch_lite_open` with `hpatchi_inplace_open` and `hpatch_lite_patch` with `hpatchi_inplaceB`. When alloc memory for temp_cache, memory size need to add **extraSafeSize**. 
-  (best practices: when needed, after obtaining extraSafeSize, you can add an min-write page size of storage chips to extraSafeSize, this simplifies the implementation of read_old & write_new;
-  or you can choose to cache the data of the min-write page size yourself, so that you can write aligned full pages of data each time.)
+  (best practices: If you need to write aligned full-page data each time, you can set _IS_WTITE_NEW_BY_PAGE=1 at compile time so that you can call `hpatchi_inplaceB_by_page`.)
 
 ---
 ## Contact
