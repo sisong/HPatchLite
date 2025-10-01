@@ -20,3 +20,5 @@ Release_x86
 *.ipch
 builds/android_ndk_jni_mk/libs/
 builds/android_ndk_jni_mk/obj/
+hdiffi
+hpatchi

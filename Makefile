@@ -24,6 +24,16 @@ HPATCHI_OBJ := \
     $(HDP_PATH)/file_for_patch.o \
     $(HDP_PATH)/libHDiffPatch/HPatch/patch.o \
     $(HDP_PATH)/libHDiffPatch/HPatchLite/hpatch_lite.o
+ifeq ($(MT),0)
+else
+  HPATCHI_OBJ += \
+    $(HDP_PATH)/libHDiffPatch/HPatch/hpatch_mt/_hcache_old_mt.o \
+    $(HDP_PATH)/libHDiffPatch/HPatch/hpatch_mt/_hinput_mt.o \
+    $(HDP_PATH)/libHDiffPatch/HPatch/hpatch_mt/_houtput_mt.o \
+    $(HDP_PATH)/libHDiffPatch/HPatch/hpatch_mt/_hpatch_mt.o \
+    $(HDP_PATH)/libHDiffPatch/HPatch/hpatch_mt/hpatch_mt.o \
+    $(HDP_PATH)/libParallel/parallel_import_c.o
+endif
 
 TUZ_PATH := tinyuz
 ifeq ($(TUZ),1) # https://github.com/sisong/tinyuz  
@@ -76,8 +86,8 @@ HDIFF_PATH  := $(HDP_PATH)/libHDiffPatch/HDiff
 HDIFFI_OBJ += \
     hdiffi_import_patch.o \
     $(HDIFF_PATH)/diff.o \
-    $(HDIFF_PATH)/match_inplace.o \
     $(HDIFF_PATH)/match_block.o \
+    $(HDIFF_PATH)/private_diff/match_inplace.o \
     $(HDIFF_PATH)/private_diff/bytes_rle.o \
     $(HDIFF_PATH)/private_diff/suffix_string.o \
     $(HDIFF_PATH)/private_diff/compress_detect.o \
@@ -91,7 +101,7 @@ HDIFFI_OBJ += \
 ifeq ($(MT),0)
 else
   HDIFFI_OBJ += \
-    $(HDP_PATH)/libParallel/parallel_import.o \
+    $(HDP_PATH)/libParallel/parallel_import_c.o \
     $(HDP_PATH)/libParallel/parallel_channel.o \
     $(HDP_PATH)/compress_parallel.o
 endif
@@ -148,18 +158,16 @@ PATCH_LINK :=
 ifeq ($(ZLIB),2)
   PATCH_LINK += -lz			# link zlib
 endif
-ifeq ($(M32),0)
-else
-  PATCH_LINK += -m32
-endif
-ifeq ($(MINS),0)
-else
-  PATCH_LINK += -s -Wl,--gc-sections,--as-needed
-endif
+# ...
 ifeq ($(STATIC_C),0)
 else
   PATCH_LINK += -static
 endif
+ifeq ($(MT),0)
+else
+  PATCH_LINK += -lpthread	# link pthread
+endif
+
 DIFF_LINK  := $(PATCH_LINK)
 ifeq ($(MT),0)
 else
