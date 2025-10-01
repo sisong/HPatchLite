@@ -22,4 +22,4 @@ builds/android_ndk_jni_mk/libs/
 builds/android_ndk_jni_mk/obj/
 hdiffi
 hpatchi
-.vscode/launch.json
+*.vscode/

@@ -1,6 +1,7 @@
 # args
 MT       := 1
 TUZ		   := 1
+DEBUG    ?= 0
 # 0: not need zlib;  1: compile zlib source code;  2: used -lz to link zlib lib;
 ZLIB     := 1
 LZMA     := 1
@@ -106,9 +107,14 @@ else
     $(HDP_PATH)/compress_parallel.o
 endif
 
+ifeq ($(DEBUG),1)
+  DBG_FLAGS := -g -O0
+else
+  DBG_FLAGS := -O3 -DNDEBUG
+endif
 
 DEF_FLAGS := \
-    -O3 -DNDEBUG -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
+    $(DBG_FLAGS) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
     -D_IS_NEED_DEFAULT_CompressPlugin=0
 ifeq ($(M32),0)
 else
