@@ -201,6 +201,7 @@ hdiffi: libhpatchlite.a
 ifeq ($(OS),Windows_NT) # mingw?
   RM := del /Q /F
   DEL_HDIFFI_OBJ := $(subst /,\,$(HDIFFI_OBJ))
+  DEF_FLAGS += -D_WIN32_WINNT=0x0600
 else
   RM := rm -f
   DEL_HDIFFI_OBJ := $(HDIFFI_OBJ)
