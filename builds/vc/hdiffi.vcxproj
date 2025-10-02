@@ -115,6 +115,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HPATCH_IS_USED_MULTITHREAD=0;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -125,6 +126,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HPATCH_IS_USED_MULTITHREAD=0;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -135,6 +137,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HPATCH_IS_USED_MULTITHREAD=0;_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -147,6 +150,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HPATCH_IS_USED_MULTITHREAD=0;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -162,6 +166,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HPATCH_IS_USED_MULTITHREAD=0;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -177,6 +182,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HPATCH_IS_USED_MULTITHREAD=0;_ARM64_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -200,7 +206,7 @@
     <ClCompile Include="..\..\HDiffPatch\compress_parallel.cpp" />
     <ClCompile Include="..\..\HDiffPatch\file_for_patch.c" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\diff.cpp" />
-    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\match_inplace.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\match_inplace.cpp" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\bytes_rle.cpp" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\compress_detect.cpp" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HDiff\private_diff\libdivsufsort\divsufsort64.cpp" />
@@ -213,7 +219,7 @@
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatchLite\hpatch_lite.c" />
     <ClCompile Include="..\..\HDiffPatch\libHDiffPatch\HPatch\patch.c" />
     <ClCompile Include="..\..\HDiffPatch\libParallel\parallel_channel.cpp" />
-    <ClCompile Include="..\..\HDiffPatch\libParallel\parallel_import.cpp" />
+    <ClCompile Include="..\..\HDiffPatch\libParallel\parallel_import_c.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\HDiffPatch\libHDiffPatch\HDiff\diff_for_hpatch_lite.h" />

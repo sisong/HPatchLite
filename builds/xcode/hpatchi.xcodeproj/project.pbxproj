@@ -203,6 +203,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 					"_IS_USED_SHARE_hpatch_lite_types=1",
+					"_HPATCH_IS_USED_MULTITHREAD=0",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -268,6 +269,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
 					"_IS_USED_SHARE_hpatch_lite_types=1",
+					"_HPATCH_IS_USED_MULTITHREAD=0",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;

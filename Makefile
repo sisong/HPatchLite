@@ -76,8 +76,7 @@ HDIFF_PATH  := $(HDP_PATH)/libHDiffPatch/HDiff
 HDIFFI_OBJ += \
     hdiffi_import_patch.o \
     $(HDIFF_PATH)/diff.o \
-    $(HDIFF_PATH)/match_inplace.o \
-    $(HDIFF_PATH)/match_block.o \
+    $(HDIFF_PATH)/private_diff/match_inplace.o \
     $(HDIFF_PATH)/private_diff/bytes_rle.o \
     $(HDIFF_PATH)/private_diff/suffix_string.o \
     $(HDIFF_PATH)/private_diff/compress_detect.o \
@@ -91,7 +90,7 @@ HDIFFI_OBJ += \
 ifeq ($(MT),0)
 else
   HDIFFI_OBJ += \
-    $(HDP_PATH)/libParallel/parallel_import.o \
+    $(HDP_PATH)/libParallel/parallel_import_c.o \
     $(HDP_PATH)/libParallel/parallel_channel.o \
     $(HDP_PATH)/compress_parallel.o
 endif
@@ -99,7 +98,7 @@ endif
 
 DEF_FLAGS := \
     -O3 -DNDEBUG -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
-    -D_IS_NEED_DEFAULT_CompressPlugin=0
+    -D_IS_NEED_DEFAULT_CompressPlugin=0 -D_HPATCH_IS_USED_MULTITHREAD=0
 ifeq ($(M32),0)
 else
   DEF_FLAGS += -m32
@@ -140,8 +139,7 @@ ifeq ($(MT),0)
     -D_IS_USED_MULTITHREAD=0
 else
   DEF_FLAGS += \
-    -D_IS_USED_MULTITHREAD=1 \
-    -D_IS_USED_CPP11THREAD=1
+    -D_IS_USED_MULTITHREAD=1
 endif
 
 PATCH_LINK := 
